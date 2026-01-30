@@ -39,7 +39,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 - **Offline Capable**: Works without internet connection
 - **No Patient Identifiable Information**: Designed for anonymized data only
 
-### 📱 Mobile Optimized
+### 📱 Mobile Optimised
 - Responsive design for iPhone and iPad
 - Can be installed as a PWA (Add to Home Screen)
 - Works like a native app
