@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a2540">
+    <title>Anaesthetic Logbook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --deep-navy: #0a2540;
+            --ocean-blue: #0d3b66;
+            --teal: #0fa3b1;
+            --mint: #b8e0d2;
+            --cream: #f7f3e8;
+            --coral: #f95738;
+            --gold: #d4a574;
+            --text-dark: #1a2332;
+            --text-light: #e8eef3;
+            --shadow: rgba(10, 37, 64, 0.15);
+            --glass: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--deep-navy) 0%, var(--ocean-blue) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Background texture */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(15, 163, 177, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(212, 165, 116, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.75rem;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            color: var(--cream);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .stat-item {
+            text-align: right;
+        }
+
+        .stat-label {
+            opacity: 0.7;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--mint);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--teal), var(--ocean-blue));
+            border-color: var(--teal);
+            box-shadow: 0 4px 15px rgba(15, 163, 177, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1.5rem;
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--cream);
+            border-bottom: 2px solid var(--teal);
+            padding-bottom: 0.75rem;
+        }
+
+        /* Form Elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--mint);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            font-size: 0.75rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="time"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.875rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--teal);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 3px rgba(15, 163, 177, 0.15);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        /* Checkbox Groups */
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--teal);
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            text-transform: none;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-light);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'IBM Plex Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--teal), var(--ocean-blue));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(15, 163, 177, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-danger {
+            background: var(--coral);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e04527;
+            transform: translateY(-2px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Case List */
+        .case-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .case-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .case-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+            border-color: var(--teal);
+        }
+
+        .case-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .case-date {
+            font-size: 0.875rem;
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .case-asa {
+            background: var(--teal);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .case-procedure {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--cream);
+        }
+
+        .case-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .case-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Search & Filter */
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-select {
+            min-width: 150px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            opacity: 0.7;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Stats Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(15, 163, 177, 0.15), rgba(13, 59, 102, 0.15));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--teal);
+            font-family: 'DM Serif Display', serif;
+        }
+
+        .stat-card-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 37, 64, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--ocean-blue);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 900px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--teal);
+        }
+
+        .modal-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.75rem;
+            color: var(--cream);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-light);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Loading indicator */
+        .saving-indicator {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--teal);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(15, 163, 177, 0.4);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .saving-indicator.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Detail view in modal */
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            color: var(--mint);
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--cream);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>Anaesthetic Logbook</h1>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Cases</div>
+                        <div class="stat-value" id="totalCases">0</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-view="new-case">New Case</button>
+            <button class="tab-btn" data-view="cases">My Cases</button>
+            <button class="tab-btn" data-view="stats">Statistics</button>
+            <button class="tab-btn" data-view="export">Export</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- New Case View -->
+            <div id="new-case" class="view active">
+                <form id="caseForm">
+                    <!-- Patient & Case Details -->
+                    <div class="card">
+                        <h2 class="card-header">Patient & Case Details</h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="caseDate">Date *</label>
+                                <input type="date" id="caseDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="caseTime">Time</label>
+                                <input type="time" id="caseTime">
+                            </div>
+                            <div class="form-group">
+                                <label for="patientAge">Patient Age *</label>
+                                <input type="number" id="patientAge" min="0" max="120" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patientSex">Sex</label>
+                                <select id="patientSex">
+                                    <option value="">Select...</option>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="asaGrade">ASA Grade *</label>
+                                <select id="asaGrade" required>
+                                    <option value="">Select...</option>
+                                    <option value="1">ASA 1</option>
+                                    <option value="2">ASA 2</option>
+                                    <option value="3">ASA 3</option>
+                                    <option value="4">ASA 4</option>
+                                    <option value="5">ASA 5</option>
+                                    <option value="6">ASA 6</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="urgency">Urgency</label>
+                                <select id="urgency">
+                                    <option value="">Select...</option>
+                                    <option value="Elective">Elective</option>
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Urgent">Urgent</option>
+                                    <option value="Emergency">Emergency</option>
+                                    <option value="Immediate">Immediate (within minutes)</option>
+                                </select>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="procedure">Procedure / Operation *</label>
+                                <input type="text" id="procedure" required placeholder="e.g. Laparoscopic cholecystectomy">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="specialty">Surgical Specialty</label>
+                                <select id="specialty">
+                                    <option value="">Select...</option>
+                                    <option value="General Surgery">General Surgery</option>
+                                    <option value="Orthopaedics">Orthopaedics</option>
+                                    <option value="Urology">Urology</option>
+                                    <option value="Gynaecology">Gynaecology</option>
+                                    <option value="Obstetrics">Obstetrics</option>
+                                    <option value="ENT">ENT</option>
+                                    <option value="Ophthalmology">Ophthalmology</option>
+                                    <option value="Plastics">Plastic Surgery</option>
+                                    <option value="Neurosurgery">Neurosurgery</option>
+                                    <option value="Cardiothoracic">Cardiothoracic</option>
+                                    <option value="Vascular">Vascular</option>
+                                    <option value="Paediatric">Paediatric Surgery</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Anaesthetic Technique -->
+                    <div class="card">
+                        <h2 class="card-header">Anaesthetic Technique</h2>
+                        <div class="form-group">
+                            <label>Primary Technique *</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="radio" name="primaryTechnique" id="ga" value="General Anaesthetic">
+                                    <label for="ga">General Anaesthetic</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="radio" name="primaryTechnique" id="ra" value="Regional Anaesthetic">
+                                    <label for="ra">Regional Anaesthetic</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="radio" name="primaryTechnique" id="sedation" value="Sedation">
+                                    <label for="sedation">Sedation</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="radio" name="primaryTechnique" id="la" value="Local Anaesthetic">
+                                    <label for="la">Local Anaesthetic</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Regional Techniques (if applicable)</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="spinal" value="Spinal">
+                                    <label for="spinal">Spinal</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="epiduralLumbar" value="Epidural Lumbar">
+                                    <label for="epiduralLumbar">Epidural Lumbar</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="epiduralThoracic" value="Epidural Thoracic">
+                                    <label for="epiduralThoracic">Epidural Thoracic</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="epiduralTopup" value="Epidural Topup">
+                                    <label for="epiduralTopup">Epidural Topup</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cse" value="Combined Spinal-Epidural (CSE)">
+                                    <label for="cse">Combined Spinal-Epidural (CSE)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="brachialPlexusInterscalene" value="Brachial Plexus Interscalene">
+                                    <label for="brachialPlexusInterscalene">Brachial Plexus Interscalene</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="brachialPlexusSupraClavicular" value="Brachial Plexus Supra Clavicular">
+                                    <label for="brachialPlexusSupraClavicular">Brachial Plexus Supra Clavicular</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="brachialPlexusInfraClavicular" value="Brachial Plexus Infra Clavicular">
+                                    <label for="brachialPlexusInfraClavicular">Brachial Plexus Infra Clavicular</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="axillaryNerve" value="Axillary Nerve">
+                                    <label for="axillaryNerve">Axillary Nerve</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="femoral" value="Femoral">
+                                    <label for="femoral">Femoral</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="adductorCanal" value="Adductor Canal Block">
+                                    <label for="adductorCanal">Adductor Canal Block</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="fasciaIliaca" value="Fascia Iliaca">
+                                    <label for="fasciaIliaca">Fascia Iliaca</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="sciatic" value="Sciatic">
+                                    <label for="sciatic">Sciatic</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="popliteal" value="Popliteal">
+                                    <label for="popliteal">Popliteal</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="femoralSciaticCombined" value="Femoral Sciatic Combined">
+                                    <label for="femoralSciaticCombined">Femoral Sciatic Combined</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="ankle" value="Ankle">
+                                    <label for="ankle">Ankle</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tap" value="TAP">
+                                    <label for="tap">TAP (Transversus Abdominis Plane)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="erectorsSpinae" value="Erector Spinae Plane (ESP)">
+                                    <label for="erectorsSpinae">Erector Spinae Plane (ESP)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="quadratusLumborum" value="Quadratus Lumborum">
+                                    <label for="quadratusLumborum">Quadratus Lumborum</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="rectusSheath" value="Rectus Sheath">
+                                    <label for="rectusSheath">Rectus Sheath</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="paravertebral" value="Paravertebral">
+                                    <label for="paravertebral">Paravertebral</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="intercostal" value="Intercostal">
+                                    <label for="intercostal">Intercostal</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cervicalPlexusCombined" value="Cervical Plexus Combined">
+                                    <label for="cervicalPlexusCombined">Cervical Plexus Combined</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cervicalPlexusDeep" value="Cervical Plexus Deep">
+                                    <label for="cervicalPlexusDeep">Cervical Plexus Deep</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cervicalPlexusSuperficial" value="Cervical Plexus Superficial">
+                                    <label for="cervicalPlexusSuperficial">Cervical Plexus Superficial</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="caudal" value="Caudal">
+                                    <label for="caudal">Caudal</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="penile" value="Penile">
+                                    <label for="penile">Penile</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="eyeSubtenon" value="Eye Subtenon">
+                                    <label for="eyeSubtenon">Eye Subtenon</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="ulnar" value="Ulnar">
+                                    <label for="ulnar">Ulnar</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="airway">Airway Management</label>
+                            <select id="airway">
+                                <option value="">Select...</option>
+                                <option value="ETT">Endotracheal Tube</option>
+                                <option value="LMA">Laryngeal Mask Airway</option>
+                                <option value="i-gel">i-gel</option>
+                                <option value="Face Mask">Face Mask</option>
+                                <option value="Nasal">Nasal Airway</option>
+                                <option value="Tracheostomy">Tracheostomy</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="induction">Induction Agents</label>
+                            <textarea id="induction" placeholder="e.g. Propofol 200mg, Fentanyl 100mcg, Rocuronium 50mg"></textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="maintenance">Maintenance</label>
+                            <textarea id="maintenance" placeholder="e.g. Sevoflurane in O2/Air, Remifentanil infusion"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Monitoring & Vascular Access -->
+                    <div class="card">
+                        <h2 class="card-header">Monitoring & Vascular Access</h2>
+                        <div class="form-group">
+                            <label>Monitoring</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="stdMonitoring" value="Standard monitoring" checked>
+                                    <label for="stdMonitoring">Standard (ECG, NIBP, SpO2, EtCO2)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="arterialLine" value="Arterial line">
+                                    <label for="arterialLine">Arterial Line</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cvp" value="Central Venous Pressure">
+                                    <label for="cvp">CVP</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cvl" value="Central Line">
+                                    <label for="cvl">Central Line</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="pacMonitoring" value="PA Catheter">
+                                    <label for="pacMonitoring">PA Catheter</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="bis" value="BIS">
+                                    <label for="bis">BIS/Depth of Anaesthesia</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tof" value="Train-of-Four">
+                                    <label for="tof">Train-of-Four</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="temp" value="Temperature">
+                                    <label for="temp">Temperature Monitoring</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="nirs" value="NIRS">
+                                    <label for="nirs">NIRS Monitoring</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cardiacOutput" value="Cardiac Output Monitoring">
+                                    <label for="cardiacOutput">Cardiac Output Monitoring</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="toeEcho" value="TOE">
+                                    <label for="toeEcho">Echocardiography (TOE)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="ttEcho" value="TTE">
+                                    <label for="ttEcho">Echocardiography (Transthoracic)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Procedures & Techniques -->
+                    <div class="card">
+                        <h2 class="card-header">Procedures & Special Techniques</h2>
+                        <div class="form-group">
+                            <label>Select all procedures/techniques performed</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="rsi" value="RSI">
+                                    <label for="rsi">RSI (Rapid Sequence Induction)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tiva" value="TIVA">
+                                    <label for="tiva">TIVA</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tci" value="TCI">
+                                    <label for="tci">TCI (Target Controlled Infusion)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="videoLaryngoscopy" value="Video Laryngoscopy">
+                                    <label for="videoLaryngoscopy">Video Laryngoscopy</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="fibreopticAwake" value="Fibreoptic Awake">
+                                    <label for="fibreopticAwake">Fibreoptic Awake</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="fibreopticAsleep" value="Fibreoptic Asleep">
+                                    <label for="fibreopticAsleep">Fibreoptic Asleep</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="dlt" value="DLT">
+                                    <label for="dlt">DLT (Double Lumen Tube)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="inhalationInduction" value="Inhalation Induction">
+                                    <label for="inhalationInduction">Inhalation Induction</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="nasal" value="Nasal">
+                                    <label for="nasal">Nasal Intubation</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="prone" value="Prone">
+                                    <label for="prone">Prone Positioning</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="centralLineJugular" value="Central Line Jugular">
+                                    <label for="centralLineJugular">Central Line (Jugular)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="centralLineSubclavian" value="Central Line Subclavian">
+                                    <label for="centralLineSubclavian">Central Line (Subclavian)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="centralLineFemoral" value="Central Line Femoral">
+                                    <label for="centralLineFemoral">Central Line (Femoral)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="centralLineOther" value="Central Line Other">
+                                    <label for="centralLineOther">Central Line (Other Site)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="vascath" value="Vascath">
+                                    <label for="vascath">Vascath</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="massiveTransfusion" value="Massive Transfusion">
+                                    <label for="massiveTransfusion">Massive Transfusion</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cpb" value="Cardiopulmonary Bypass">
+                                    <label for="cpb">Cardiopulmonary Bypass</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="dhca" value="DHCA">
+                                    <label for="dhca">Deep Hypothermic Circulatory Arrest</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="bronchoscopy" value="Bronchoscopy">
+                                    <label for="bronchoscopy">Bronchoscopy</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="chestDrainSeldinger" value="Chest Drain Seldinger">
+                                    <label for="chestDrainSeldinger">Chest Drain (Seldinger)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="chestDrainSurgical" value="Chest Drain Surgical">
+                                    <label for="chestDrainSurgical">Chest Drain (Surgical)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="thoracotomy" value="Thoracotomy">
+                                    <label for="thoracotomy">Thoracotomy</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tracheostomyPerc" value="Tracheostomy Percutaneous">
+                                    <label for="tracheostomyPerc">Tracheostomy (Percutaneous)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="frontOfNeck" value="Front of Neck">
+                                    <label for="frontOfNeck">Front of Neck Access</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="injectorVent" value="Injector Ventilation">
+                                    <label for="injectorVent">Injector Ventilation</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="thrive" value="THRIVE">
+                                    <label for="thrive">THRIVE (High-Flow Apnoeic Oxygenation)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="apnoiecOxy" value="Apnoeic Oxygenation">
+                                    <label for="apnoiecOxy">Apnoeic Oxygenation</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="lumbarPuncture" value="Lumbar Puncture">
+                                    <label for="lumbarPuncture">Lumbar Puncture</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="asciticDrain" value="Ascitic Drain">
+                                    <label for="asciticDrain">Ascitic Drain/Tap</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="sengstaken" value="Sengstaken Tube">
+                                    <label for="sengstaken">Sengstaken Tube Placement</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="cpet" value="CPET">
+                                    <label for="cpet">CPET (Cardiopulmonary Exercise Testing)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="brainStem" value="Brain Stem Testing">
+                                    <label for="brainStem">Brain Stem Testing</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="preopSedation" value="Preoperative Sedation">
+                                    <label for="preopSedation">Preoperative Sedation</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complications & Critical Events -->
+                    <div class="card">
+                        <h2 class="card-header">Complications & Critical Events</h2>
+                        <div class="form-group">
+                            <label>Any Complications?</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="noComplications" value="None">
+                                    <label for="noComplications">No Complications</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="difficultAirway" value="Difficult Airway">
+                                    <label for="difficultAirway">Difficult Airway</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="hypotension" value="Hypotension">
+                                    <label for="hypotension">Hypotension</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="hypertension" value="Hypertension">
+                                    <label for="hypertension">Hypertension</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="arrhythmia" value="Arrhythmia">
+                                    <label for="arrhythmia">Arrhythmia</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="desaturation" value="Desaturation">
+                                    <label for="desaturation">Desaturation</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="bronchospasm" value="Bronchospasm">
+                                    <label for="bronchospasm">Bronchospasm</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="anaphylaxis" value="Anaphylaxis">
+                                    <label for="anaphylaxis">Anaphylaxis</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="awareness" value="Awareness">
+                                    <label for="awareness">Awareness</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="arrest" value="Cardiac Arrest">
+                                    <label for="arrest">Cardiac Arrest</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="complicationDetails">Complication Details</label>
+                            <textarea id="complicationDetails" placeholder="Describe any complications, management, and outcome..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Supervision & Learning -->
+                    <div class="card">
+                        <h2 class="card-header">Supervision & Professional Development</h2>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="supervision">Level of Supervision</label>
+                                <select id="supervision">
+                                    <option value="">Select...</option>
+                                    <option value="Supervised - Direct">Supervised - Direct (supervisor present throughout)</option>
+                                    <option value="Supervised - Indirect">Supervised - Indirect (supervisor immediately available)</option>
+                                    <option value="Supervised - Distant">Supervised - Distant (supervisor on-call)</option>
+                                    <option value="Independent">Independent Practice</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="supervisor">Supervisor Name</label>
+                                <input type="text" id="supervisor" placeholder="e.g. Dr Smith">
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="reflection">Learning Points / Reflection</label>
+                            <textarea id="reflection" placeholder="What did you learn? Any teaching points? Areas for improvement?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="card">
+                        <h2 class="card-header">Additional Information</h2>
+                        <div class="form-group full-width">
+                            <label for="notes">Additional Notes</label>
+                            <textarea id="notes" placeholder="Any other relevant information..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Save Case</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Cases View -->
+            <div id="cases" class="view">
+                <div class="card">
+                    <div class="search-filter">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search procedures, specialties...">
+                        <select id="filterASA" class="filter-select">
+                            <option value="">All ASA Grades</option>
+                            <option value="1">ASA 1</option>
+                            <option value="2">ASA 2</option>
+                            <option value="3">ASA 3</option>
+                            <option value="4">ASA 4</option>
+                            <option value="5">ASA 5</option>
+                        </select>
+                        <select id="filterSpecialty" class="filter-select">
+                            <option value="">All Specialties</option>
+                        </select>
+                    </div>
+                    <div id="caseList" class="case-list"></div>
+                </div>
+            </div>
+
+            <!-- Stats View -->
+            <div id="stats" class="view">
+                <div class="stats-grid" id="statsGrid"></div>
+                <div class="card">
+                    <h2 class="card-header">Breakdown by Specialty</h2>
+                    <div id="specialtyBreakdown"></div>
+                </div>
+                <div class="card">
+                    <h2 class="card-header">Breakdown by ASA Grade</h2>
+                    <div id="asaBreakdown"></div>
+                </div>
+            </div>
+
+            <!-- Export View -->
+            <div id="export" class="view">
+                <div class="card">
+                    <h2 class="card-header">Export Your Data</h2>
+                    <p style="margin-bottom: 2rem; opacity: 0.9;">Export your logbook for revalidation, backup, or analysis.</p>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="exportToPDF()">📄 Export as PDF</button>
+                        <button class="btn btn-primary" onclick="exportToExcel()">📊 Export as Excel</button>
+                        <button class="btn btn-primary" onclick="exportToCSV()">📋 Export as CSV</button>
+                        <button class="btn btn-secondary" onclick="exportToJSON()">💾 Export as JSON (Backup)</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="card-header">Import Data</h2>
+                    <p style="margin-bottom: 2rem; opacity: 0.9;">Import previously exported JSON backup files.</p>
+                    <button class="btn btn-secondary" onclick="importData()">📥 Import Data</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                </div>
+                <div class="card">
+                    <h2 class="card-header">Data Management</h2>
+                    <p style="margin-bottom: 2rem; opacity: 0.9;">⚠️ Warning: This will permanently delete all your cases.</p>
+                    <button class="btn btn-danger" onclick="clearAllData()">Delete All Data</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Case Detail Modal -->
+    <div id="caseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Case Details</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="caseDetails"></div>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                <button class="btn btn-danger" onclick="deleteCase()">Delete Case</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saving Indicator -->
+    <div id="savingIndicator" class="saving-indicator">✓ Case saved successfully</div>
+
+    <script>
+        // Data storage
+        let cases = [];
+        let currentCaseId = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCases();
+            updateStats();
+            setDefaultDate();
+            
+            // Tab navigation
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    switchView(this.dataset.view);
+                });
+            });
+
+            // Form submission
+            document.getElementById('caseForm').addEventListener('submit', saveCase);
+
+            // Search and filter
+            document.getElementById('searchInput').addEventListener('input', filterCases);
+            document.getElementById('filterASA').addEventListener('change', filterCases);
+            document.getElementById('filterSpecialty').addEventListener('change', filterCases);
+
+            // Import file
+            document.getElementById('importFile').addEventListener('change', handleImport);
+
+            populateSpecialtyFilter();
+        });
+
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('caseDate').value = today;
+        }
+
+        function switchView(viewName) {
+            // Update tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update views
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewName).classList.add('active');
+
+            // Refresh data if needed
+            if (viewName === 'cases') {
+                renderCases();
+            } else if (viewName === 'stats') {
+                renderStats();
+            }
+        }
+
+        function saveCase(e) {
+            e.preventDefault();
+
+            const formData = {
+                id: Date.now(),
+                date: document.getElementById('caseDate').value,
+                time: document.getElementById('caseTime').value,
+                patientAge: document.getElementById('patientAge').value,
+                patientSex: document.getElementById('patientSex').value,
+                asaGrade: document.getElementById('asaGrade').value,
+                urgency: document.getElementById('urgency').value,
+                procedure: document.getElementById('procedure').value,
+                specialty: document.getElementById('specialty').value,
+                primaryTechnique: document.querySelector('input[name="primaryTechnique"]:checked')?.value || '',
+                regionalTechniques: getCheckedValues(['spinal', 'epiduralLumbar', 'epiduralThoracic', 'epiduralTopup', 'cse', 
+                    'brachialPlexusInterscalene', 'brachialPlexusSupraClavicular', 'brachialPlexusInfraClavicular', 'axillaryNerve',
+                    'femoral', 'adductorCanal', 'fasciaIliaca', 'sciatic', 'popliteal', 'femoralSciaticCombined', 'ankle',
+                    'tap', 'erectorsSpinae', 'quadratusLumborum', 'rectusSheath', 'paravertebral', 'intercostal',
+                    'cervicalPlexusCombined', 'cervicalPlexusDeep', 'cervicalPlexusSuperficial', 'caudal', 'penile', 'eyeSubtenon', 'ulnar']),
+                airway: document.getElementById('airway').value,
+                induction: document.getElementById('induction').value,
+                maintenance: document.getElementById('maintenance').value,
+                monitoring: getCheckedValues(['stdMonitoring', 'arterialLine', 'cvp', 'cvl', 'pacMonitoring', 'bis', 'tof', 'temp', 'nirs', 'cardiacOutput', 'toeEcho', 'ttEcho']),
+                procedures: getCheckedValues(['rsi', 'tiva', 'tci', 'videoLaryngoscopy', 'fibreopticAwake', 'fibreopticAsleep', 
+                    'dlt', 'inhalationInduction', 'nasal', 'prone', 'centralLineJugular', 'centralLineSubclavian', 'centralLineFemoral',
+                    'centralLineOther', 'vascath', 'massiveTransfusion', 'cpb', 'dhca', 'bronchoscopy', 'chestDrainSeldinger',
+                    'chestDrainSurgical', 'thoracotomy', 'tracheostomyPerc', 'frontOfNeck', 'injectorVent', 'thrive', 'apnoiecOxy',
+                    'lumbarPuncture', 'asciticDrain', 'sengstaken', 'cpet', 'brainStem', 'preopSedation']),
+                complications: getCheckedValues(['noComplications', 'difficultAirway', 'hypotension', 'hypertension', 'arrhythmia', 'desaturation', 'bronchospasm', 'anaphylaxis', 'awareness', 'arrest']),
+                complicationDetails: document.getElementById('complicationDetails').value,
+                supervision: document.getElementById('supervision').value,
+                supervisor: document.getElementById('supervisor').value,
+                reflection: document.getElementById('reflection').value,
+                notes: document.getElementById('notes').value
+            };
+
+            cases.push(formData);
+            saveCases();
+            showSaveIndicator();
+            resetForm();
+            updateStats();
+        }
+
+        function getCheckedValues(ids) {
+            return ids
+                .filter(id => document.getElementById(id)?.checked)
+                .map(id => document.getElementById(id).value);
+        }
+
+        function saveCases() {
+            localStorage.setItem('anaestheticCases', JSON.stringify(cases));
+        }
+
+        function loadCases() {
+            const stored = localStorage.getItem('anaestheticCases');
+            if (stored) {
+                cases = JSON.parse(stored);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('caseForm').reset();
+            setDefaultDate();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('savingIndicator');
+            indicator.classList.add('active');
+            setTimeout(() => {
+                indicator.classList.remove('active');
+            }, 3000);
+        }
+
+        function updateStats() {
+            document.getElementById('totalCases').textContent = cases.length;
+        }
+
+        function renderCases() {
+            const container = document.getElementById('caseList');
+            
+            if (cases.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No cases logged yet</h3>
+                        <p>Start by adding your first case</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedCases = [...cases].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = sortedCases.map(caseData => `
+                <div class="case-card" onclick="viewCase(${caseData.id})">
+                    <div class="case-card-header">
+                        <span class="case-date">${formatDate(caseData.date)}</span>
+                        <span class="case-asa">ASA ${caseData.asaGrade}</span>
+                    </div>
+                    <div class="case-procedure">${caseData.procedure}</div>
+                    <div class="case-details">
+                        <span class="case-detail-item">👤 Age ${caseData.patientAge}</span>
+                        ${caseData.specialty ? `<span class="case-detail-item">🏥 ${caseData.specialty}</span>` : ''}
+                        ${caseData.primaryTechnique ? `<span class="case-detail-item">💉 ${caseData.primaryTechnique}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCases() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const asaFilter = document.getElementById('filterASA').value;
+            const specialtyFilter = document.getElementById('filterSpecialty').value;
+
+            const filtered = cases.filter(caseData => {
+                const matchesSearch = !searchTerm || 
+                    caseData.procedure.toLowerCase().includes(searchTerm) ||
+                    caseData.specialty.toLowerCase().includes(searchTerm);
+                
+                const matchesASA = !asaFilter || caseData.asaGrade === asaFilter;
+                const matchesSpecialty = !specialtyFilter || caseData.specialty === specialtyFilter;
+
+                return matchesSearch && matchesASA && matchesSpecialty;
+            });
+
+            renderFilteredCases(filtered);
+        }
+
+        function renderFilteredCases(filteredCases) {
+            const container = document.getElementById('caseList');
+            
+            if (filteredCases.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>No cases found</h3>
+                        <p>Try adjusting your filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedCases = [...filteredCases].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = sortedCases.map(caseData => `
+                <div class="case-card" onclick="viewCase(${caseData.id})">
+                    <div class="case-card-header">
+                        <span class="case-date">${formatDate(caseData.date)}</span>
+                        <span class="case-asa">ASA ${caseData.asaGrade}</span>
+                    </div>
+                    <div class="case-procedure">${caseData.procedure}</div>
+                    <div class="case-details">
+                        <span class="case-detail-item">👤 Age ${caseData.patientAge}</span>
+                        ${caseData.specialty ? `<span class="case-detail-item">🏥 ${caseData.specialty}</span>` : ''}
+                        ${caseData.primaryTechnique ? `<span class="case-detail-item">💉 ${caseData.primaryTechnique}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateSpecialtyFilter() {
+            const specialties = [...new Set(cases.map(c => c.specialty).filter(Boolean))].sort();
+            const select = document.getElementById('filterSpecialty');
+            
+            specialties.forEach(specialty => {
+                const option = document.createElement('option');
+                option.value = specialty;
+                option.textContent = specialty;
+                select.appendChild(option);
+            });
+        }
+
+        function viewCase(id) {
+            const caseData = cases.find(c => c.id === id);
+            if (!caseData) return;
+
+            currentCaseId = id;
+            const modal = document.getElementById('caseModal');
+            const details = document.getElementById('caseDetails');
+
+            details.innerHTML = `
+                <div class="detail-section">
+                    <h3>Patient & Case Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Date</div>
+                            <div class="detail-value">${formatDate(caseData.date)}</div>
+                        </div>
+                        ${caseData.time ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Time</div>
+                            <div class="detail-value">${caseData.time}</div>
+                        </div>` : ''}
+                        <div class="detail-item">
+                            <div class="detail-label">Age</div>
+                            <div class="detail-value">${caseData.patientAge} years</div>
+                        </div>
+                        ${caseData.patientSex ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Sex</div>
+                            <div class="detail-value">${caseData.patientSex}</div>
+                        </div>` : ''}
+                        <div class="detail-item">
+                            <div class="detail-label">ASA Grade</div>
+                            <div class="detail-value">ASA ${caseData.asaGrade}</div>
+                        </div>
+                        ${caseData.urgency ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Urgency</div>
+                            <div class="detail-value">${caseData.urgency}</div>
+                        </div>` : ''}
+                    </div>
+                    <div class="detail-item" style="margin-top: 1rem;">
+                        <div class="detail-label">Procedure</div>
+                        <div class="detail-value">${caseData.procedure}</div>
+                    </div>
+                    ${caseData.specialty ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Specialty</div>
+                        <div class="detail-value">${caseData.specialty}</div>
+                    </div>` : ''}
+                </div>
+
+                <div class="detail-section">
+                    <h3>Anaesthetic Technique</h3>
+                    ${caseData.primaryTechnique ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Primary Technique</div>
+                        <div class="detail-value">${caseData.primaryTechnique}</div>
+                    </div>` : ''}
+                    ${caseData.regionalTechniques.length > 0 ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Regional Techniques</div>
+                        <div class="detail-value">${caseData.regionalTechniques.join(', ')}</div>
+                    </div>` : ''}
+                    ${caseData.airway ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Airway</div>
+                        <div class="detail-value">${caseData.airway}</div>
+                    </div>` : ''}
+                    ${caseData.induction ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Induction</div>
+                        <div class="detail-value">${caseData.induction}</div>
+                    </div>` : ''}
+                    ${caseData.maintenance ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Maintenance</div>
+                        <div class="detail-value">${caseData.maintenance}</div>
+                    </div>` : ''}
+                </div>
+
+                ${caseData.monitoring.length > 0 ? `
+                <div class="detail-section">
+                    <h3>Monitoring</h3>
+                    <div class="detail-value">${caseData.monitoring.join(', ')}</div>
+                </div>` : ''}
+
+                ${caseData.procedures && caseData.procedures.length > 0 ? `
+                <div class="detail-section">
+                    <h3>Procedures & Special Techniques</h3>
+                    <div class="detail-value">${caseData.procedures.join(', ')}</div>
+                </div>` : ''}
+
+                ${caseData.complications.length > 0 || caseData.complicationDetails ? `
+                <div class="detail-section">
+                    <h3>Complications & Critical Events</h3>
+                    ${caseData.complications.length > 0 ? `
+                    <div class="detail-item">
+                        <div class="detail-value">${caseData.complications.join(', ')}</div>
+                    </div>` : ''}
+                    ${caseData.complicationDetails ? `
+                    <div class="detail-item" style="margin-top: 1rem;">
+                        <div class="detail-label">Details</div>
+                        <div class="detail-value">${caseData.complicationDetails}</div>
+                    </div>` : ''}
+                </div>` : ''}
+
+                ${caseData.supervision || caseData.supervisor ? `
+                <div class="detail-section">
+                    <h3>Supervision</h3>
+                    ${caseData.supervision ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Level</div>
+                        <div class="detail-value">${caseData.supervision}</div>
+                    </div>` : ''}
+                    ${caseData.supervisor ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Supervisor</div>
+                        <div class="detail-value">${caseData.supervisor}</div>
+                    </div>` : ''}
+                </div>` : ''}
+
+                ${caseData.reflection ? `
+                <div class="detail-section">
+                    <h3>Learning & Reflection</h3>
+                    <div class="detail-value">${caseData.reflection}</div>
+                </div>` : ''}
+
+                ${caseData.notes ? `
+                <div class="detail-section">
+                    <h3>Additional Notes</h3>
+                    <div class="detail-value">${caseData.notes}</div>
+                </div>` : ''}
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('caseModal').classList.remove('active');
+            currentCaseId = null;
+        }
+
+        function deleteCase() {
+            if (!currentCaseId) return;
+            
+            if (confirm('Are you sure you want to delete this case? This cannot be undone.')) {
+                cases = cases.filter(c => c.id !== currentCaseId);
+                saveCases();
+                closeModal();
+                renderCases();
+                updateStats();
+                showSaveIndicator();
+            }
+        }
+
+        function renderStats() {
+            const statsGrid = document.getElementById('statsGrid');
+            const totalCases = cases.length;
+            
+            // Calculate stats
+            const gaCount = cases.filter(c => c.primaryTechnique === 'General Anaesthetic').length;
+            const raCount = cases.filter(c => c.primaryTechnique === 'Regional Anaesthetic').length;
+            const complicationsCount = cases.filter(c => c.complications.length > 0 && !c.complications.includes('None')).length;
+            
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-card-value">${totalCases}</div>
+                    <div class="stat-card-label">Total Cases</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value">${gaCount}</div>
+                    <div class="stat-card-label">General Anaesthetics</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value">${raCount}</div>
+                    <div class="stat-card-label">Regional Anaesthetics</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value">${complicationsCount}</div>
+                    <div class="stat-card-label">Cases with Complications</div>
+                </div>
+            `;
+
+            // Specialty breakdown
+            const specialtyCounts = {};
+            cases.forEach(c => {
+                if (c.specialty) {
+                    specialtyCounts[c.specialty] = (specialtyCounts[c.specialty] || 0) + 1;
+                }
+            });
+
+            const specialtyBreakdown = document.getElementById('specialtyBreakdown');
+            specialtyBreakdown.innerHTML = Object.entries(specialtyCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([specialty, count]) => `
+                    <div class="detail-item" style="margin-bottom: 1rem;">
+                        <div class="detail-label">${specialty}</div>
+                        <div class="detail-value">${count} cases</div>
+                    </div>
+                `).join('') || '<p style="opacity: 0.7;">No specialty data available</p>';
+
+            // ASA breakdown
+            const asaCounts = {};
+            cases.forEach(c => {
+                if (c.asaGrade) {
+                    asaCounts[c.asaGrade] = (asaCounts[c.asaGrade] || 0) + 1;
+                }
+            });
+
+            const asaBreakdown = document.getElementById('asaBreakdown');
+            asaBreakdown.innerHTML = Object.entries(asaCounts)
+                .sort((a, b) => a[0] - b[0])
+                .map(([grade, count]) => `
+                    <div class="detail-item" style="margin-bottom: 1rem;">
+                        <div class="detail-label">ASA ${grade}</div>
+                        <div class="detail-value">${count} cases</div>
+                    </div>
+                `).join('') || '<p style="opacity: 0.7;">No ASA data available</p>';
+        }
+
+        function exportToJSON() {
+            const dataStr = JSON.stringify(cases, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `anaesthetic-logbook-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        function exportToPDF() {
+            if (cases.length === 0) {
+                alert('No cases to export');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Title
+            doc.setFontSize(20);
+            doc.setFont(undefined, 'bold');
+            doc.text('Anaesthetic Logbook', 14, 20);
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Export Date: ${new Date().toLocaleDateString('en-GB')}`, 14, 28);
+            doc.text(`Total Cases: ${cases.length}`, 14, 34);
+            
+            // Summary Statistics
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Summary Statistics', 14, 45);
+            
+            const gaCount = cases.filter(c => c.primaryTechnique === 'General Anaesthetic').length;
+            const raCount = cases.filter(c => c.primaryTechnique === 'Regional Anaesthetic').length;
+            const sedationCount = cases.filter(c => c.primaryTechnique === 'Sedation').length;
+            const complicationsCount = cases.filter(c => c.complications.length > 0 && !c.complications.includes('None')).length;
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(`General Anaesthetics: ${gaCount}`, 14, 52);
+            doc.text(`Regional Anaesthetics: ${raCount}`, 14, 58);
+            doc.text(`Sedation: ${sedationCount}`, 14, 64);
+            doc.text(`Cases with Complications: ${complicationsCount}`, 14, 70);
+            
+            // ASA Breakdown
+            const asaCounts = {};
+            cases.forEach(c => {
+                if (c.asaGrade) {
+                    asaCounts[c.asaGrade] = (asaCounts[c.asaGrade] || 0) + 1;
+                }
+            });
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('ASA Grade Distribution', 14, 82);
+            
+            let yPos = 88;
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            Object.entries(asaCounts).sort((a, b) => a[0] - b[0]).forEach(([grade, count]) => {
+                doc.text(`ASA ${grade}: ${count} (${((count/cases.length)*100).toFixed(1)}%)`, 14, yPos);
+                yPos += 6;
+            });
+            
+            // Specialty Breakdown
+            const specialtyCounts = {};
+            cases.forEach(c => {
+                if (c.specialty) {
+                    specialtyCounts[c.specialty] = (specialtyCounts[c.specialty] || 0) + 1;
+                }
+            });
+            
+            yPos += 6;
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('Specialty Distribution', 14, yPos);
+            
+            yPos += 6;
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            Object.entries(specialtyCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).forEach(([specialty, count]) => {
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                doc.text(`${specialty}: ${count}`, 14, yPos);
+                yPos += 6;
+            });
+            
+            // Case Details Table
+            doc.addPage();
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Case Details', 14, 20);
+            
+            const tableData = cases.sort((a, b) => new Date(b.date) - new Date(a.date)).map(c => [
+                formatDate(c.date),
+                c.patientAge,
+                c.asaGrade,
+                c.procedure.substring(0, 40) + (c.procedure.length > 40 ? '...' : ''),
+                c.specialty || '-',
+                c.primaryTechnique.substring(0, 20) || '-'
+            ]);
+            
+            doc.autoTable({
+                startY: 28,
+                head: [['Date', 'Age', 'ASA', 'Procedure', 'Specialty', 'Technique']],
+                body: tableData,
+                styles: { fontSize: 8, cellPadding: 2 },
+                headStyles: { fillColor: [13, 59, 102], textColor: 255 },
+                alternateRowStyles: { fillColor: [240, 248, 255] },
+                margin: { top: 28, left: 14, right: 14 }
+            });
+            
+            // Add detailed cases
+            doc.addPage();
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Detailed Case Records', 14, 20);
+            
+            let detailYPos = 30;
+            cases.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((caseData, index) => {
+                if (detailYPos > 250) {
+                    doc.addPage();
+                    detailYPos = 20;
+                }
+                
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.text(`Case ${index + 1}: ${formatDate(caseData.date)}`, 14, detailYPos);
+                detailYPos += 6;
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Procedure: ${caseData.procedure}`, 14, detailYPos);
+                detailYPos += 5;
+                
+                doc.text(`Age: ${caseData.patientAge}, ASA: ${caseData.asaGrade}, Specialty: ${caseData.specialty || 'N/A'}`, 14, detailYPos);
+                detailYPos += 5;
+                
+                if (caseData.primaryTechnique) {
+                    doc.text(`Technique: ${caseData.primaryTechnique}`, 14, detailYPos);
+                    detailYPos += 5;
+                }
+                
+                if (caseData.regionalTechniques && caseData.regionalTechniques.length > 0) {
+                    const regText = doc.splitTextToSize(`Regional: ${caseData.regionalTechniques.join(', ')}`, 180);
+                    doc.text(regText, 14, detailYPos);
+                    detailYPos += regText.length * 5;
+                }
+                
+                if (caseData.procedures && caseData.procedures.length > 0) {
+                    const procText = doc.splitTextToSize(`Procedures: ${caseData.procedures.join(', ')}`, 180);
+                    doc.text(procText, 14, detailYPos);
+                    detailYPos += procText.length * 5;
+                }
+                
+                if (caseData.complications && caseData.complications.length > 0 && !caseData.complications.includes('None')) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`Complications: ${caseData.complications.join(', ')}`, 14, detailYPos);
+                    doc.setFont(undefined, 'normal');
+                    detailYPos += 5;
+                }
+                
+                if (caseData.supervision) {
+                    doc.text(`Supervision: ${caseData.supervision}${caseData.supervisor ? ' (' + caseData.supervisor + ')' : ''}`, 14, detailYPos);
+                    detailYPos += 5;
+                }
+                
+                detailYPos += 4; // Space between cases
+                
+                if (detailYPos > 250 && index < cases.length - 1) {
+                    doc.addPage();
+                    detailYPos = 20;
+                }
+            });
+            
+            doc.save(`anaesthetic-logbook-${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        function exportToExcel() {
+            if (cases.length === 0) {
+                alert('No cases to export');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            
+            // Summary Sheet
+            const summaryData = [
+                ['Anaesthetic Logbook Summary'],
+                ['Export Date:', new Date().toLocaleDateString('en-GB')],
+                ['Total Cases:', cases.length],
+                [''],
+                ['Statistics'],
+                ['General Anaesthetics:', cases.filter(c => c.primaryTechnique === 'General Anaesthetic').length],
+                ['Regional Anaesthetics:', cases.filter(c => c.primaryTechnique === 'Regional Anaesthetic').length],
+                ['Sedation:', cases.filter(c => c.primaryTechnique === 'Sedation').length],
+                ['Cases with Complications:', cases.filter(c => c.complications.length > 0 && !c.complications.includes('None')).length],
+                [''],
+                ['ASA Grade Distribution']
+            ];
+            
+            const asaCounts = {};
+            cases.forEach(c => {
+                if (c.asaGrade) {
+                    asaCounts[c.asaGrade] = (asaCounts[c.asaGrade] || 0) + 1;
+                }
+            });
+            
+            Object.entries(asaCounts).sort((a, b) => a[0] - b[0]).forEach(([grade, count]) => {
+                summaryData.push([`ASA ${grade}:`, count, `${((count/cases.length)*100).toFixed(1)}%`]);
+            });
+            
+            summaryData.push(['']);
+            summaryData.push(['Specialty Distribution']);
+            
+            const specialtyCounts = {};
+            cases.forEach(c => {
+                if (c.specialty) {
+                    specialtyCounts[c.specialty] = (specialtyCounts[c.specialty] || 0) + 1;
+                }
+            });
+            
+            Object.entries(specialtyCounts).sort((a, b) => b[1] - a[1]).forEach(([specialty, count]) => {
+                summaryData.push([specialty + ':', count]);
+            });
+            
+            const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+            
+            // Cases Sheet
+            const casesData = [
+                ['Date', 'Time', 'Age', 'Sex', 'ASA', 'Urgency', 'Procedure', 'Specialty', 'Primary Technique', 
+                 'Regional Techniques', 'Airway', 'Induction', 'Maintenance', 'Monitoring', 'Procedures',
+                 'Complications', 'Complication Details', 'Supervision', 'Supervisor', 'Reflection', 'Notes']
+            ];
+            
+            cases.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(c => {
+                casesData.push([
+                    c.date,
+                    c.time,
+                    c.patientAge,
+                    c.patientSex,
+                    c.asaGrade,
+                    c.urgency,
+                    c.procedure,
+                    c.specialty,
+                    c.primaryTechnique,
+                    c.regionalTechniques.join('; '),
+                    c.airway,
+                    c.induction,
+                    c.maintenance,
+                    c.monitoring.join('; '),
+                    c.procedures ? c.procedures.join('; ') : '',
+                    c.complications.join('; '),
+                    c.complicationDetails,
+                    c.supervision,
+                    c.supervisor,
+                    c.reflection,
+                    c.notes
+                ]);
+            });
+            
+            const casesWs = XLSX.utils.aoa_to_sheet(casesData);
+            
+            // Set column widths
+            const colWidths = [
+                {wch: 12}, {wch: 8}, {wch: 6}, {wch: 6}, {wch: 6}, {wch: 12},
+                {wch: 40}, {wch: 15}, {wch: 20}, {wch: 30}, {wch: 15}, {wch: 30},
+                {wch: 30}, {wch: 30}, {wch: 30}, {wch: 20}, {wch: 30}, {wch: 25},
+                {wch: 15}, {wch: 40}, {wch: 40}
+            ];
+            casesWs['!cols'] = colWidths;
+            
+            XLSX.utils.book_append_sheet(wb, casesWs, 'All Cases');
+            
+            // Regional Techniques Sheet
+            const regionalData = [['Regional Technique', 'Count']];
+            const regionalCounts = {};
+            
+            cases.forEach(c => {
+                if (c.regionalTechniques && c.regionalTechniques.length > 0) {
+                    c.regionalTechniques.forEach(tech => {
+                        regionalCounts[tech] = (regionalCounts[tech] || 0) + 1;
+                    });
+                }
+            });
+            
+            Object.entries(regionalCounts).sort((a, b) => b[1] - a[1]).forEach(([tech, count]) => {
+                regionalData.push([tech, count]);
+            });
+            
+            if (regionalData.length > 1) {
+                const regionalWs = XLSX.utils.aoa_to_sheet(regionalData);
+                XLSX.utils.book_append_sheet(wb, regionalWs, 'Regional Techniques');
+            }
+            
+            // Procedures Sheet
+            const proceduresData = [['Procedure', 'Count']];
+            const procedureCounts = {};
+            
+            cases.forEach(c => {
+                if (c.procedures && c.procedures.length > 0) {
+                    c.procedures.forEach(proc => {
+                        procedureCounts[proc] = (procedureCounts[proc] || 0) + 1;
+                    });
+                }
+            });
+            
+            Object.entries(procedureCounts).sort((a, b) => b[1] - a[1]).forEach(([proc, count]) => {
+                proceduresData.push([proc, count]);
+            });
+            
+            if (proceduresData.length > 1) {
+                const proceduresWs = XLSX.utils.aoa_to_sheet(proceduresData);
+                XLSX.utils.book_append_sheet(wb, proceduresWs, 'Procedures');
+            }
+            
+            XLSX.writeFile(wb, `anaesthetic-logbook-${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        function exportToCSV() {
+            if (cases.length === 0) {
+                alert('No cases to export');
+                return;
+            }
+
+            const headers = ['Date', 'Time', 'Age', 'Sex', 'ASA', 'Urgency', 'Procedure', 'Specialty', 
+                           'Primary Technique', 'Regional Techniques', 'Airway', 'Monitoring', 'Procedures',
+                           'Supervision', 'Supervisor', 'Complications'];
+            
+            const rows = cases.map(c => [
+                c.date,
+                c.time,
+                c.patientAge,
+                c.patientSex,
+                c.asaGrade,
+                c.urgency,
+                c.procedure,
+                c.specialty,
+                c.primaryTechnique,
+                c.regionalTechniques.join('; '),
+                c.airway,
+                c.monitoring.join('; '),
+                c.procedures ? c.procedures.join('; ') : '',
+                c.supervision,
+                c.supervisor,
+                c.complications.join('; ')
+            ]);
+
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `anaesthetic-logbook-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (confirm(`Import ${imported.length} cases? This will merge with existing data.`)) {
+                        cases = [...cases, ...imported];
+                        saveCases();
+                        updateStats();
+                        renderCases();
+                        alert('Data imported successfully');
+                    }
+                } catch (err) {
+                    alert('Error importing data. Please check the file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL cases? This cannot be undone.')) {
+                if (confirm('This is your final warning. All data will be permanently deleted.')) {
+                    cases = [];
+                    saveCases();
+                    updateStats();
+                    renderCases();
+                    alert('All data has been deleted');
+                }
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('caseModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
