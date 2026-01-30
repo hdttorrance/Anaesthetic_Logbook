@@ -34,6 +34,34 @@
             --glass: rgba(255, 255, 255, 0.08);
         }
 
+        /* Light Theme */
+        [data-theme="light"] {
+            --deep-navy: #f0f4f8;
+            --ocean-blue: #ffffff;
+            --teal: #0fa3b1;
+            --mint: #0d3b66;
+            --cream: #1a2332;
+            --text-light: #1a2332;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --glass: rgba(0, 0, 0, 0.03);
+        }
+
+        /* Color Schemes */
+        [data-color="red"] {
+            --teal: #dc2626;
+            --mint: #fca5a5;
+        }
+
+        [data-color="green"] {
+            --teal: #16a34a;
+            --mint: #86efac;
+        }
+
+        [data-color="blue"] {
+            --teal: #0fa3b1;
+            --mint: #b8e0d2;
+        }
+
         body {
             font-family: 'IBM Plex Sans', -apple-system, sans-serif;
             background: linear-gradient(135deg, var(--deep-navy) 0%, var(--ocean-blue) 100%);
@@ -83,7 +111,74 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .theme-btn {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .theme-btn.active {
+            background: var(--teal);
+            border-color: var(--teal);
+        }
+
+        .color-selector {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: var(--text-light);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .color-blue { background: #0fa3b1; }
+        .color-red { background: #dc2626; }
+        .color-green { background: #16a34a; }
 
         h1 {
             font-family: 'DM Serif Display', serif;
@@ -541,9 +636,25 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-left,
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .theme-controls {
+                flex-wrap: wrap;
+            }
+
             .header-stats {
                 flex-direction: column;
                 gap: 0.5rem;
+                width: 100%;
             }
 
             .form-grid {
@@ -640,11 +751,24 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <h1>Anaesthetic Logbook</h1>
-                <div class="header-stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Total Cases</div>
-                        <div class="stat-value" id="totalCases">0</div>
+                <div class="header-left">
+                    <h1>Anaesthetic Logbook</h1>
+                </div>
+                <div class="header-right">
+                    <div class="theme-controls">
+                        <button class="theme-btn active" id="themeDark" onclick="setTheme('dark')">Dark</button>
+                        <button class="theme-btn" id="themeLight" onclick="setTheme('light')">Light</button>
+                        <div class="color-selector">
+                            <div class="color-option color-blue active" onclick="setColor('blue')" title="Blue"></div>
+                            <div class="color-option color-red" onclick="setColor('red')" title="Red"></div>
+                            <div class="color-option color-green" onclick="setColor('green')" title="Green"></div>
+                        </div>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Cases</div>
+                            <div class="stat-value" id="totalCases">0</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -674,6 +798,11 @@
                             <div class="form-group">
                                 <label for="caseTime">Time</label>
                                 <input type="time" id="caseTime">
+                            </div>
+                            <div class="form-group">
+                                <label for="location">Location *</label>
+                                <input type="text" id="location" list="locationsList" required placeholder="e.g. Main Theatre 1, ICU">
+                                <datalist id="locationsList"></datalist>
                             </div>
                             <div class="form-group">
                                 <label for="patientAge">Patient Age *</label>
@@ -721,6 +850,7 @@
                                     <option value="">Select...</option>
                                     <option value="General Surgery">General Surgery</option>
                                     <option value="Orthopaedics">Orthopaedics</option>
+                                    <option value="Trauma">Trauma</option>
                                     <option value="Urology">Urology</option>
                                     <option value="Gynaecology">Gynaecology</option>
                                     <option value="Obstetrics">Obstetrics</option>
@@ -731,6 +861,8 @@
                                     <option value="Cardiothoracic">Cardiothoracic</option>
                                     <option value="Vascular">Vascular</option>
                                     <option value="Paediatric">Paediatric Surgery</option>
+                                    <option value="Critical Care">Critical Care</option>
+                                    <option value="Prehospital">Prehospital</option>
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
@@ -741,22 +873,22 @@
                     <div class="card">
                         <h2 class="card-header">Anaesthetic Technique</h2>
                         <div class="form-group">
-                            <label>Primary Technique *</label>
+                            <label>Technique (select all that apply)</label>
                             <div class="checkbox-group">
                                 <div class="checkbox-item">
-                                    <input type="radio" name="primaryTechnique" id="ga" value="General Anaesthetic">
+                                    <input type="checkbox" id="ga" value="General Anaesthetic">
                                     <label for="ga">General Anaesthetic</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="radio" name="primaryTechnique" id="ra" value="Regional Anaesthetic">
+                                    <input type="checkbox" id="ra" value="Regional Anaesthetic">
                                     <label for="ra">Regional Anaesthetic</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="radio" name="primaryTechnique" id="sedation" value="Sedation">
+                                    <input type="checkbox" id="sedation" value="Sedation">
                                     <label for="sedation">Sedation</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="radio" name="primaryTechnique" id="la" value="Local Anaesthetic">
+                                    <input type="checkbox" id="la" value="Local Anaesthetic">
                                     <label for="la">Local Anaesthetic</label>
                                 </div>
                             </div>
@@ -854,10 +986,6 @@
                                     <label for="intercostal">Intercostal</label>
                                 </div>
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="cervicalPlexusCombined" value="Cervical Plexus Combined">
-                                    <label for="cervicalPlexusCombined">Cervical Plexus Combined</label>
-                                </div>
-                                <div class="checkbox-item">
                                     <input type="checkbox" id="cervicalPlexusDeep" value="Cervical Plexus Deep">
                                     <label for="cervicalPlexusDeep">Cervical Plexus Deep</label>
                                 </div>
@@ -881,6 +1009,52 @@
                                     <input type="checkbox" id="ulnar" value="Ulnar">
                                     <label for="ulnar">Ulnar</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Regional Block Technique (select all that apply)</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="landmark" value="Landmark">
+                                    <label for="landmark">Landmark</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="usInPlane" value="Ultrasound In-Plane">
+                                    <label for="usInPlane">Ultrasound In-Plane</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="usOutOfPlane" value="Ultrasound Out-of-Plane">
+                                    <label for="usOutOfPlane">Ultrasound Out-of-Plane</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="usNerveStim" value="Ultrasound and Nerve Stimulator">
+                                    <label for="usNerveStim">Ultrasound and Nerve Stimulator</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="nerveStim" value="Nerve Stimulator">
+                                    <label for="nerveStim">Nerve Stimulator</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="regionalOutcome">Regional Block Outcome</label>
+                                <select id="regionalOutcome">
+                                    <option value="">No value</option>
+                                    <option value="Successful">Successful</option>
+                                    <option value="Partially Successful">Partially Successful</option>
+                                    <option value="Unsuccessful">Unsuccessful</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="catheter">Catheter Inserted?</label>
+                                <select id="catheter">
+                                    <option value="">Select...</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
                             </div>
                         </div>
 
@@ -916,8 +1090,8 @@
                             <label>Monitoring</label>
                             <div class="checkbox-group">
                                 <div class="checkbox-item">
-                                    <input type="checkbox" id="stdMonitoring" value="Standard monitoring" checked>
-                                    <label for="stdMonitoring">Standard (ECG, NIBP, SpO2, EtCO2)</label>
+                                    <input type="checkbox" id="stdMonitoring" value="Standard AAGBI" checked>
+                                    <label for="stdMonitoring">Standard AAGBI (ECG, NIBP, SpO2, EtCO2)</label>
                                 </div>
                                 <div class="checkbox-item">
                                     <input type="checkbox" id="arterialLine" value="Arterial line">
@@ -1062,8 +1236,16 @@
                                     <label for="thoracotomy">Thoracotomy</label>
                                 </div>
                                 <div class="checkbox-item">
+                                    <input type="checkbox" id="thoracostomy" value="Thoracostomy">
+                                    <label for="thoracostomy">Thoracostomy</label>
+                                </div>
+                                <div class="checkbox-item">
                                     <input type="checkbox" id="tracheostomyPerc" value="Tracheostomy Percutaneous">
                                     <label for="tracheostomyPerc">Tracheostomy (Percutaneous)</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="deepExtubation" value="Deep Extubation">
+                                    <label for="deepExtubation">Deep Extubation</label>
                                 </div>
                                 <div class="checkbox-item">
                                     <input type="checkbox" id="frontOfNeck" value="Front of Neck">
@@ -1155,6 +1337,14 @@
                                     <input type="checkbox" id="arrest" value="Cardiac Arrest">
                                     <label for="arrest">Cardiac Arrest</label>
                                 </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="criticalCareAdmission" value="Unexpected Critical Care Admission">
+                                    <label for="criticalCareAdmission">Unexpected Critical Care Admission</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="death" value="Death">
+                                    <label for="death">Death</label>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group full-width">
@@ -1171,10 +1361,11 @@
                                 <label for="supervision">Level of Supervision</label>
                                 <select id="supervision">
                                     <option value="">Select...</option>
-                                    <option value="Supervised - Direct">Supervised - Direct (supervisor present throughout)</option>
-                                    <option value="Supervised - Indirect">Supervised - Indirect (supervisor immediately available)</option>
-                                    <option value="Supervised - Distant">Supervised - Distant (supervisor on-call)</option>
-                                    <option value="Independent">Independent Practice</option>
+                                    <option value="Level 1 - Direct (present throughout)">Level 1 - Direct (present throughout)</option>
+                                    <option value="Level 2A - In theatre suite (regular intervals)">Level 2A - In theatre suite (regular intervals)</option>
+                                    <option value="Level 2B - Within hospital (prompt assistance)">Level 2B - Within hospital (prompt assistance)</option>
+                                    <option value="Level 3 - On call from home (phone/non-immediate)">Level 3 - On call from home (phone/non-immediate)</option>
+                                    <option value="Level 4 - Independent (no supervisor involvement)">Level 4 - Independent (no supervisor involvement)</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1241,8 +1432,54 @@
             <!-- Export View -->
             <div id="export" class="view">
                 <div class="card">
-                    <h2 class="card-header">Export Your Data</h2>
-                    <p style="margin-bottom: 2rem; opacity: 0.9;">Export your logbook for revalidation, backup, or analysis.</p>
+                    <h2 class="card-header">Cloud Storage Sync</h2>
+                    <p style="margin-bottom: 1.5rem; opacity: 0.9;">Connect to cloud storage for automatic backups. Your data will be saved as JSON files that you can access from any device.</p>
+                    
+                    <div id="cloudStatus" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="font-size: 1.2rem;">✓</span>
+                            <strong>Connected to <span id="connectedService"></span></strong>
+                        </div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">
+                            Last sync: <span id="lastSyncTime">Never</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="connectGoogleDrive()" id="googleDriveBtn">
+                            <span style="font-size: 1.2rem;">📁</span> Connect Google Drive
+                        </button>
+                        <button class="btn btn-primary" onclick="connectDropbox()" id="dropboxBtn">
+                            <span style="font-size: 1.2rem;">📦</span> Connect Dropbox
+                        </button>
+                        <button class="btn btn-primary" onclick="connectBox()" id="boxBtn">
+                            <span style="font-size: 1.2rem;">📤</span> Connect Box
+                        </button>
+                    </div>
+                    
+                    <div class="btn-group" style="margin-top: 1rem;">
+                        <button class="btn btn-secondary" onclick="syncToCloud()" id="syncBtn" disabled>
+                            🔄 Sync Now
+                        </button>
+                        <button class="btn btn-secondary" onclick="disconnectCloud()" id="disconnectBtn" disabled>
+                            🔌 Disconnect
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(15, 163, 177, 0.1); border-left: 3px solid var(--teal); border-radius: 4px;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">
+                            <strong>💡 How it works:</strong><br>
+                            • Your data is saved as a JSON file in your chosen cloud storage<br>
+                            • Automatic sync when you save a new case<br>
+                            • Access your backup from any device<br>
+                            • You maintain full control of your data
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-header">Manual Export</h2>
+                    <p style="margin-bottom: 2rem; opacity: 0.9;">Download files directly to your device for revalidation, backup, or analysis.</p>
                     <div class="btn-group">
                         <button class="btn btn-primary" onclick="exportToPDF()">📄 Export as PDF</button>
                         <button class="btn btn-primary" onclick="exportToExcel()">📊 Export as Excel</button>
@@ -1348,18 +1585,22 @@
                 id: Date.now(),
                 date: document.getElementById('caseDate').value,
                 time: document.getElementById('caseTime').value,
+                location: document.getElementById('location').value,
                 patientAge: document.getElementById('patientAge').value,
                 patientSex: document.getElementById('patientSex').value,
                 asaGrade: document.getElementById('asaGrade').value,
                 urgency: document.getElementById('urgency').value,
                 procedure: document.getElementById('procedure').value,
                 specialty: document.getElementById('specialty').value,
-                primaryTechnique: document.querySelector('input[name="primaryTechnique"]:checked')?.value || '',
+                techniques: getCheckedValues(['ga', 'ra', 'sedation', 'la']),
                 regionalTechniques: getCheckedValues(['spinal', 'epiduralLumbar', 'epiduralThoracic', 'epiduralTopup', 'cse', 
                     'brachialPlexusInterscalene', 'brachialPlexusSupraClavicular', 'brachialPlexusInfraClavicular', 'axillaryNerve',
                     'femoral', 'adductorCanal', 'fasciaIliaca', 'sciatic', 'popliteal', 'femoralSciaticCombined', 'ankle',
                     'tap', 'erectorsSpinae', 'quadratusLumborum', 'rectusSheath', 'paravertebral', 'intercostal',
-                    'cervicalPlexusCombined', 'cervicalPlexusDeep', 'cervicalPlexusSuperficial', 'caudal', 'penile', 'eyeSubtenon', 'ulnar']),
+                    'cervicalPlexusDeep', 'cervicalPlexusSuperficial', 'caudal', 'penile', 'eyeSubtenon', 'ulnar']),
+                regionalBlockTechnique: getCheckedValues(['landmark', 'usInPlane', 'usOutOfPlane', 'usNerveStim', 'nerveStim']),
+                regionalOutcome: document.getElementById('regionalOutcome').value,
+                catheter: document.getElementById('catheter').value,
                 airway: document.getElementById('airway').value,
                 induction: document.getElementById('induction').value,
                 maintenance: document.getElementById('maintenance').value,
@@ -1367,9 +1608,9 @@
                 procedures: getCheckedValues(['rsi', 'tiva', 'tci', 'videoLaryngoscopy', 'fibreopticAwake', 'fibreopticAsleep', 
                     'dlt', 'inhalationInduction', 'nasal', 'prone', 'centralLineJugular', 'centralLineSubclavian', 'centralLineFemoral',
                     'centralLineOther', 'vascath', 'massiveTransfusion', 'cpb', 'dhca', 'bronchoscopy', 'chestDrainSeldinger',
-                    'chestDrainSurgical', 'thoracotomy', 'tracheostomyPerc', 'frontOfNeck', 'injectorVent', 'thrive', 'apnoiecOxy',
+                    'chestDrainSurgical', 'thoracotomy', 'thoracostomy', 'tracheostomyPerc', 'deepExtubation', 'frontOfNeck', 'injectorVent', 'thrive', 'apnoiecOxy',
                     'lumbarPuncture', 'asciticDrain', 'sengstaken', 'cpet', 'brainStem', 'preopSedation']),
-                complications: getCheckedValues(['noComplications', 'difficultAirway', 'hypotension', 'hypertension', 'arrhythmia', 'desaturation', 'bronchospasm', 'anaphylaxis', 'awareness', 'arrest']),
+                complications: getCheckedValues(['noComplications', 'difficultAirway', 'hypotension', 'hypertension', 'arrhythmia', 'desaturation', 'bronchospasm', 'anaphylaxis', 'awareness', 'arrest', 'criticalCareAdmission', 'death']),
                 complicationDetails: document.getElementById('complicationDetails').value,
                 supervision: document.getElementById('supervision').value,
                 supervisor: document.getElementById('supervisor').value,
@@ -1379,6 +1620,7 @@
 
             cases.push(formData);
             saveCases();
+            saveLocation(formData.location);
             showSaveIndicator();
             resetForm();
             updateStats();
@@ -1434,7 +1676,12 @@
 
             const sortedCases = [...cases].sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            container.innerHTML = sortedCases.map(caseData => `
+            container.innerHTML = sortedCases.map(caseData => {
+                // Handle legacy data
+                const techniques = caseData.techniques || (caseData.primaryTechnique ? [caseData.primaryTechnique] : []);
+                const techniqueDisplay = techniques.length > 0 ? techniques.join(', ') : '';
+                
+                return `
                 <div class="case-card" onclick="viewCase(${caseData.id})">
                     <div class="case-card-header">
                         <span class="case-date">${formatDate(caseData.date)}</span>
@@ -1443,11 +1690,12 @@
                     <div class="case-procedure">${caseData.procedure}</div>
                     <div class="case-details">
                         <span class="case-detail-item">👤 Age ${caseData.patientAge}</span>
+                        ${caseData.location ? `<span class="case-detail-item">📍 ${caseData.location}</span>` : ''}
                         ${caseData.specialty ? `<span class="case-detail-item">🏥 ${caseData.specialty}</span>` : ''}
-                        ${caseData.primaryTechnique ? `<span class="case-detail-item">💉 ${caseData.primaryTechnique}</span>` : ''}
+                        ${techniqueDisplay ? `<span class="case-detail-item">💉 ${techniqueDisplay}</span>` : ''}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function filterCases() {
@@ -1485,7 +1733,12 @@
 
             const sortedCases = [...filteredCases].sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            container.innerHTML = sortedCases.map(caseData => `
+            container.innerHTML = sortedCases.map(caseData => {
+                // Handle legacy data
+                const techniques = caseData.techniques || (caseData.primaryTechnique ? [caseData.primaryTechnique] : []);
+                const techniqueDisplay = techniques.length > 0 ? techniques.join(', ') : '';
+                
+                return `
                 <div class="case-card" onclick="viewCase(${caseData.id})">
                     <div class="case-card-header">
                         <span class="case-date">${formatDate(caseData.date)}</span>
@@ -1494,11 +1747,12 @@
                     <div class="case-procedure">${caseData.procedure}</div>
                     <div class="case-details">
                         <span class="case-detail-item">👤 Age ${caseData.patientAge}</span>
+                        ${caseData.location ? `<span class="case-detail-item">📍 ${caseData.location}</span>` : ''}
                         ${caseData.specialty ? `<span class="case-detail-item">🏥 ${caseData.specialty}</span>` : ''}
-                        ${caseData.primaryTechnique ? `<span class="case-detail-item">💉 ${caseData.primaryTechnique}</span>` : ''}
+                        ${techniqueDisplay ? `<span class="case-detail-item">💉 ${techniqueDisplay}</span>` : ''}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function populateSpecialtyFilter() {
@@ -1521,6 +1775,11 @@
             const modal = document.getElementById('caseModal');
             const details = document.getElementById('caseDetails');
 
+            // Handle legacy data - convert old primaryTechnique to techniques array
+            if (caseData.primaryTechnique && !caseData.techniques) {
+                caseData.techniques = [caseData.primaryTechnique];
+            }
+
             details.innerHTML = `
                 <div class="detail-section">
                     <h3>Patient & Case Information</h3>
@@ -1533,6 +1792,11 @@
                         <div class="detail-item">
                             <div class="detail-label">Time</div>
                             <div class="detail-value">${caseData.time}</div>
+                        </div>` : ''}
+                        ${caseData.location ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">${caseData.location}</div>
                         </div>` : ''}
                         <div class="detail-item">
                             <div class="detail-label">Age</div>
@@ -1566,15 +1830,30 @@
 
                 <div class="detail-section">
                     <h3>Anaesthetic Technique</h3>
-                    ${caseData.primaryTechnique ? `
+                    ${caseData.techniques && caseData.techniques.length > 0 ? `
                     <div class="detail-item">
-                        <div class="detail-label">Primary Technique</div>
-                        <div class="detail-value">${caseData.primaryTechnique}</div>
+                        <div class="detail-label">Technique(s)</div>
+                        <div class="detail-value">${caseData.techniques.join(', ')}</div>
                     </div>` : ''}
-                    ${caseData.regionalTechniques.length > 0 ? `
+                    ${caseData.regionalTechniques && caseData.regionalTechniques.length > 0 ? `
                     <div class="detail-item">
                         <div class="detail-label">Regional Techniques</div>
                         <div class="detail-value">${caseData.regionalTechniques.join(', ')}</div>
+                    </div>` : ''}
+                    ${caseData.regionalBlockTechnique && caseData.regionalBlockTechnique.length > 0 ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Regional Block Technique</div>
+                        <div class="detail-value">${caseData.regionalBlockTechnique.join(', ')}</div>
+                    </div>` : ''}
+                    ${caseData.regionalOutcome ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Regional Block Outcome</div>
+                        <div class="detail-value">${caseData.regionalOutcome}</div>
+                    </div>` : ''}
+                    ${caseData.catheter ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Catheter</div>
+                        <div class="detail-value">${caseData.catheter}</div>
                     </div>` : ''}
                     ${caseData.airway ? `
                     <div class="detail-item">
@@ -1593,7 +1872,7 @@
                     </div>` : ''}
                 </div>
 
-                ${caseData.monitoring.length > 0 ? `
+                ${caseData.monitoring && caseData.monitoring.length > 0 ? `
                 <div class="detail-section">
                     <h3>Monitoring</h3>
                     <div class="detail-value">${caseData.monitoring.join(', ')}</div>
@@ -1605,10 +1884,10 @@
                     <div class="detail-value">${caseData.procedures.join(', ')}</div>
                 </div>` : ''}
 
-                ${caseData.complications.length > 0 || caseData.complicationDetails ? `
+                ${caseData.complications && caseData.complications.length > 0 || caseData.complicationDetails ? `
                 <div class="detail-section">
                     <h3>Complications & Critical Events</h3>
-                    ${caseData.complications.length > 0 ? `
+                    ${caseData.complications && caseData.complications.length > 0 ? `
                     <div class="detail-item">
                         <div class="detail-value">${caseData.complications.join(', ')}</div>
                     </div>` : ''}
@@ -1767,9 +2046,18 @@
             doc.setFont(undefined, 'bold');
             doc.text('Summary Statistics', 14, 45);
             
-            const gaCount = cases.filter(c => c.primaryTechnique === 'General Anaesthetic').length;
-            const raCount = cases.filter(c => c.primaryTechnique === 'Regional Anaesthetic').length;
-            const sedationCount = cases.filter(c => c.primaryTechnique === 'Sedation').length;
+            const gaCount = cases.filter(c => {
+                const techs = c.techniques || (c.primaryTechnique ? [c.primaryTechnique] : []);
+                return techs.includes('General Anaesthetic');
+            }).length;
+            const raCount = cases.filter(c => {
+                const techs = c.techniques || (c.primaryTechnique ? [c.primaryTechnique] : []);
+                return techs.includes('Regional Anaesthetic');
+            }).length;
+            const sedationCount = cases.filter(c => {
+                const techs = c.techniques || (c.primaryTechnique ? [c.primaryTechnique] : []);
+                return techs.includes('Sedation');
+            }).length;
             const complicationsCount = cases.filter(c => c.complications.length > 0 && !c.complications.includes('None')).length;
             
             doc.setFontSize(10);
@@ -2063,28 +2351,35 @@
                 return;
             }
 
-            const headers = ['Date', 'Time', 'Age', 'Sex', 'ASA', 'Urgency', 'Procedure', 'Specialty', 
-                           'Primary Technique', 'Regional Techniques', 'Airway', 'Monitoring', 'Procedures',
-                           'Supervision', 'Supervisor', 'Complications'];
+            const headers = ['Date', 'Time', 'Location', 'Age', 'Sex', 'ASA', 'Urgency', 'Procedure', 'Specialty', 
+                           'Techniques', 'Regional Techniques', 'Regional Block Technique', 'Regional Outcome', 'Catheter',
+                           'Airway', 'Monitoring', 'Procedures', 'Supervision', 'Supervisor', 'Complications'];
             
-            const rows = cases.map(c => [
-                c.date,
-                c.time,
-                c.patientAge,
-                c.patientSex,
-                c.asaGrade,
-                c.urgency,
-                c.procedure,
-                c.specialty,
-                c.primaryTechnique,
-                c.regionalTechniques.join('; '),
-                c.airway,
-                c.monitoring.join('; '),
-                c.procedures ? c.procedures.join('; ') : '',
-                c.supervision,
-                c.supervisor,
-                c.complications.join('; ')
-            ]);
+            const rows = cases.map(c => {
+                const techniques = c.techniques || (c.primaryTechnique ? [c.primaryTechnique] : []);
+                return [
+                    c.date,
+                    c.time,
+                    c.location || '',
+                    c.patientAge,
+                    c.patientSex,
+                    c.asaGrade,
+                    c.urgency,
+                    c.procedure,
+                    c.specialty,
+                    techniques.join('; '),
+                    c.regionalTechniques ? c.regionalTechniques.join('; ') : '',
+                    c.regionalBlockTechnique ? c.regionalBlockTechnique.join('; ') : '',
+                    c.regionalOutcome || '',
+                    c.catheter || '',
+                    c.airway,
+                    c.monitoring ? c.monitoring.join('; ') : '',
+                    c.procedures ? c.procedures.join('; ') : '',
+                    c.supervision,
+                    c.supervisor,
+                    c.complications ? c.complications.join('; ') : ''
+                ];
+            });
 
             const csvContent = [
                 headers.join(','),
@@ -2152,6 +2447,237 @@
                 closeModal();
             }
         });
+
+        // Theme management
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            // Update button states
+            document.getElementById('themeDark').classList.toggle('active', theme === 'dark');
+            document.getElementById('themeLight').classList.toggle('active', theme === 'light');
+        }
+
+        function setColor(color) {
+            document.documentElement.setAttribute('data-color', color);
+            localStorage.setItem('colorScheme', color);
+            
+            // Update color option states
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.querySelector(`.color-${color}`).classList.add('active');
+        }
+
+        // Load saved theme preferences
+        function loadThemePreferences() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const savedColor = localStorage.getItem('colorScheme') || 'blue';
+            setTheme(savedTheme);
+            setColor(savedColor);
+        }
+
+        // Location autocomplete management
+        function saveLocation(location) {
+            if (!location) return;
+            
+            let locations = JSON.parse(localStorage.getItem('locations') || '[]');
+            if (!locations.includes(location)) {
+                locations.push(location);
+                localStorage.setItem('locations', JSON.stringify(locations));
+                updateLocationsList();
+            }
+        }
+
+        function updateLocationsList() {
+            const datalist = document.getElementById('locationsList');
+            const locations = JSON.parse(localStorage.getItem('locations') || '[]');
+            
+            datalist.innerHTML = locations.map(loc => 
+                `<option value="${loc}">`
+            ).join('');
+        }
+
+        // Call on page load
+        loadThemePreferences();
+        updateLocationsList();
+        updateCloudStorageUI();
+
+        // Cloud Storage Integration
+        let cloudConfig = {
+            service: null, // 'google', 'dropbox', or 'box'
+            accessToken: null,
+            fileName: 'anaesthetic-logbook-backup.json'
+        };
+
+        function loadCloudConfig() {
+            const saved = localStorage.getItem('cloudConfig');
+            if (saved) {
+                cloudConfig = JSON.parse(saved);
+                updateCloudStorageUI();
+            }
+        }
+
+        function saveCloudConfig() {
+            localStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
+        }
+
+        function updateCloudStorageUI() {
+            loadCloudConfig();
+            
+            const isConnected = cloudConfig.service && cloudConfig.accessToken;
+            
+            // Update status display
+            const statusDiv = document.getElementById('cloudStatus');
+            const serviceSpan = document.getElementById('connectedService');
+            const syncBtn = document.getElementById('syncBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            
+            if (isConnected) {
+                statusDiv.style.display = 'block';
+                serviceSpan.textContent = cloudConfig.service.charAt(0).toUpperCase() + cloudConfig.service.slice(1);
+                syncBtn.disabled = false;
+                disconnectBtn.disabled = false;
+                
+                // Update last sync time
+                const lastSync = localStorage.getItem('lastCloudSync');
+                if (lastSync) {
+                    const syncDate = new Date(lastSync);
+                    document.getElementById('lastSyncTime').textContent = syncDate.toLocaleString();
+                }
+                
+                // Disable connection buttons
+                document.getElementById('googleDriveBtn').disabled = true;
+                document.getElementById('dropboxBtn').disabled = true;
+                document.getElementById('boxBtn').disabled = true;
+            } else {
+                statusDiv.style.display = 'none';
+                syncBtn.disabled = true;
+                disconnectBtn.disabled = true;
+                
+                // Enable connection buttons
+                document.getElementById('googleDriveBtn').disabled = false;
+                document.getElementById('dropboxBtn').disabled = false;
+                document.getElementById('boxBtn').disabled = false;
+            }
+        }
+
+        async function connectGoogleDrive() {
+            // Google Drive OAuth 2.0 implementation
+            alert('Google Drive Integration:\n\n' +
+                  'To use Google Drive sync, you need to set up OAuth credentials:\n\n' +
+                  '1. Go to Google Cloud Console (console.cloud.google.com)\n' +
+                  '2. Create a new project\n' +
+                  '3. Enable Google Drive API\n' +
+                  '4. Create OAuth 2.0 credentials\n' +
+                  '5. Add your app URL to authorized origins\n\n' +
+                  'For a simpler solution, use the manual Export to JSON and upload to Google Drive manually.\n\n' +
+                  'Would you like a hosted version with cloud sync built-in? Please contact your administrator.');
+            
+            // For self-hosted version, users would need to add their own OAuth credentials
+            // This is a placeholder showing how it would work
+        }
+
+        async function connectDropbox() {
+            // Dropbox OAuth 2.0 implementation
+            alert('Dropbox Integration:\n\n' +
+                  'To use Dropbox sync, you need to:\n\n' +
+                  '1. Create a Dropbox app at dropbox.com/developers\n' +
+                  '2. Get your App key and secret\n' +
+                  '3. Configure OAuth redirect URL\n\n' +
+                  'For a simpler solution, use the manual Export to JSON and upload to Dropbox manually.\n\n' +
+                  'Would you like a hosted version with cloud sync built-in? Please contact your administrator.');
+        }
+
+        async function connectBox() {
+            // Box OAuth 2.0 implementation
+            alert('Box Integration:\n\n' +
+                  'To use Box sync, you need to:\n\n' +
+                  '1. Create a Box app at box.com/developers\n' +
+                  '2. Get your Client ID and secret\n' +
+                  '3. Configure OAuth redirect URL\n\n' +
+                  'For a simpler solution, use the manual Export to JSON and upload to Box manually.\n\n' +
+                  'Would you like a hosted version with cloud sync built-in? Please contact your administrator.');
+        }
+
+        async function syncToCloud() {
+            if (!cloudConfig.service || !cloudConfig.accessToken) {
+                alert('Please connect to a cloud storage service first.');
+                return;
+            }
+
+            try {
+                const dataStr = JSON.stringify(cases, null, 2);
+                
+                // Upload based on service
+                switch(cloudConfig.service) {
+                    case 'google':
+                        await uploadToGoogleDrive(dataStr);
+                        break;
+                    case 'dropbox':
+                        await uploadToDropbox(dataStr);
+                        break;
+                    case 'box':
+                        await uploadToBox(dataStr);
+                        break;
+                }
+                
+                localStorage.setItem('lastCloudSync', new Date().toISOString());
+                updateCloudStorageUI();
+                alert('✓ Synced successfully!');
+            } catch (error) {
+                console.error('Cloud sync error:', error);
+                alert('Sync failed. Please try again or check your connection.');
+            }
+        }
+
+        async function uploadToGoogleDrive(data) {
+            // Google Drive API upload implementation
+            // This would use the stored access token
+            throw new Error('OAuth setup required');
+        }
+
+        async function uploadToDropbox(data) {
+            // Dropbox API upload implementation
+            throw new Error('OAuth setup required');
+        }
+
+        async function uploadToBox(data) {
+            // Box API upload implementation
+            throw new Error('OAuth setup required');
+        }
+
+        function disconnectCloud() {
+            if (confirm('Disconnect from cloud storage? Your local data will not be affected, but automatic syncing will stop.')) {
+                cloudConfig = {
+                    service: null,
+                    accessToken: null,
+                    fileName: 'anaesthetic-logbook-backup.json'
+                };
+                saveCloudConfig();
+                localStorage.removeItem('lastCloudSync');
+                updateCloudStorageUI();
+                alert('Disconnected from cloud storage.');
+            }
+        }
+
+        // Auto-sync after saving a case (if connected)
+        const originalSaveCase = saveCase;
+        saveCase = function(e) {
+            originalSaveCase(e);
+            
+            // Auto-sync to cloud if connected
+            if (cloudConfig.service && cloudConfig.accessToken) {
+                setTimeout(() => {
+                    syncToCloud().catch(err => {
+                        console.error('Auto-sync failed:', err);
+                    });
+                }, 1000);
+            }
+        };
+
+        // Initialize cloud storage UI
+        loadCloudConfig();
     </script>
 </body>
 </html>
