@@ -707,6 +707,96 @@
             }
         }
 
+        /* Location management */
+        .location-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .location-tag:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--coral);
+        }
+
+        .location-tag-text {
+            color: var(--text-light);
+        }
+
+        .location-delete-btn {
+            background: none;
+            border: none;
+            color: var(--coral);
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .location-delete-btn:hover {
+            background: var(--coral);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Hospital management - same styling as location */
+        .hospital-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .hospital-tag:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--coral);
+        }
+
+        .hospital-tag-text {
+            color: var(--text-light);
+        }
+
+        .hospital-delete-btn {
+            background: none;
+            border: none;
+            color: var(--coral);
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .hospital-delete-btn:hover {
+            background: var(--coral);
+            color: white;
+            transform: scale(1.1);
+        }
+
         /* Detail view in modal */
         .detail-section {
             margin-bottom: 2rem;
@@ -800,9 +890,14 @@
                                 <input type="time" id="caseTime">
                             </div>
                             <div class="form-group">
-                                <label for="location">Location *</label>
+                                <label for="location">Location (where case was performed) *</label>
                                 <input type="text" id="location" list="locationsList" required placeholder="e.g. Main Theatre 1, ICU">
                                 <datalist id="locationsList"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label for="hospital">Hospital</label>
+                                <input type="text" id="hospital" list="hospitalsList" placeholder="e.g. Royal Infirmary, St Mary's">
+                                <datalist id="hospitalsList"></datalist>
                             </div>
                             <div class="form-group">
                                 <label for="patientAge">Patient Age *</label>
@@ -1432,6 +1527,34 @@
             <!-- Export View -->
             <div id="export" class="view">
                 <div class="card">
+                    <h2 class="card-header">Manage Saved Locations</h2>
+                    <p style="margin-bottom: 1rem; opacity: 0.9;">View and manage your saved location list. Remove any locations with typos or that you no longer use.</p>
+                    
+                    <div id="locationManager" style="margin-bottom: 1.5rem;">
+                        <div id="savedLocationsList" style="display: grid; gap: 0.5rem; margin-bottom: 1rem;">
+                            <!-- Locations will be populated here -->
+                        </div>
+                        <div id="noLocationsMsg" style="opacity: 0.7; padding: 1rem; text-align: center; display: none;">
+                            No saved locations yet. Locations will appear here after you save your first case.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-header">Manage Saved Hospitals</h2>
+                    <p style="margin-bottom: 1rem; opacity: 0.9;">View and manage your saved hospital list. Remove any hospitals with typos or that you no longer use.</p>
+                    
+                    <div id="hospitalManager" style="margin-bottom: 1.5rem;">
+                        <div id="savedHospitalsList" style="display: grid; gap: 0.5rem; margin-bottom: 1rem;">
+                            <!-- Hospitals will be populated here -->
+                        </div>
+                        <div id="noHospitalsMsg" style="opacity: 0.7; padding: 1rem; text-align: center; display: none;">
+                            No saved hospitals yet. Hospitals will appear here after you save your first case.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
                     <h2 class="card-header">Cloud Storage Sync</h2>
                     <p style="margin-bottom: 1.5rem; opacity: 0.9;">Connect to cloud storage for automatic backups. Your data will be saved as JSON files that you can access from any device.</p>
                     
@@ -1575,6 +1698,9 @@
                 renderCases();
             } else if (viewName === 'stats') {
                 renderStats();
+            } else if (viewName === 'export') {
+                updateLocationsList(); // Refresh location manager
+                updateHospitalsList(); // Refresh hospital manager
             }
         }
 
@@ -1586,6 +1712,7 @@
                 date: document.getElementById('caseDate').value,
                 time: document.getElementById('caseTime').value,
                 location: document.getElementById('location').value,
+                hospital: document.getElementById('hospital').value,
                 patientAge: document.getElementById('patientAge').value,
                 patientSex: document.getElementById('patientSex').value,
                 asaGrade: document.getElementById('asaGrade').value,
@@ -1621,6 +1748,7 @@
             cases.push(formData);
             saveCases();
             saveLocation(formData.location);
+            saveHospital(formData.hospital);
             showSaveIndicator();
             resetForm();
             updateStats();
@@ -1691,7 +1819,8 @@
                     <div class="case-details">
                         <span class="case-detail-item">👤 Age ${caseData.patientAge}</span>
                         ${caseData.location ? `<span class="case-detail-item">📍 ${caseData.location}</span>` : ''}
-                        ${caseData.specialty ? `<span class="case-detail-item">🏥 ${caseData.specialty}</span>` : ''}
+                        ${caseData.hospital ? `<span class="case-detail-item">🏥 ${caseData.hospital}</span>` : ''}
+                        ${caseData.specialty ? `<span class="case-detail-item">🔬 ${caseData.specialty}</span>` : ''}
                         ${techniqueDisplay ? `<span class="case-detail-item">💉 ${techniqueDisplay}</span>` : ''}
                     </div>
                 </div>
@@ -1748,7 +1877,8 @@
                     <div class="case-details">
                         <span class="case-detail-item">👤 Age ${caseData.patientAge}</span>
                         ${caseData.location ? `<span class="case-detail-item">📍 ${caseData.location}</span>` : ''}
-                        ${caseData.specialty ? `<span class="case-detail-item">🏥 ${caseData.specialty}</span>` : ''}
+                        ${caseData.hospital ? `<span class="case-detail-item">🏥 ${caseData.hospital}</span>` : ''}
+                        ${caseData.specialty ? `<span class="case-detail-item">🔬 ${caseData.specialty}</span>` : ''}
                         ${techniqueDisplay ? `<span class="case-detail-item">💉 ${techniqueDisplay}</span>` : ''}
                     </div>
                 </div>
@@ -1797,6 +1927,11 @@
                         <div class="detail-item">
                             <div class="detail-label">Location</div>
                             <div class="detail-value">${caseData.location}</div>
+                        </div>` : ''}
+                        ${caseData.hospital ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Hospital</div>
+                            <div class="detail-value">${caseData.hospital}</div>
                         </div>` : ''}
                         <div class="detail-item">
                             <div class="detail-label">Age</div>
@@ -2351,7 +2486,7 @@
                 return;
             }
 
-            const headers = ['Date', 'Time', 'Location', 'Age', 'Sex', 'ASA', 'Urgency', 'Procedure', 'Specialty', 
+            const headers = ['Date', 'Time', 'Location', 'Hospital', 'Age', 'Sex', 'ASA', 'Urgency', 'Procedure', 'Specialty', 
                            'Techniques', 'Regional Techniques', 'Regional Block Technique', 'Regional Outcome', 'Catheter',
                            'Airway', 'Monitoring', 'Procedures', 'Supervision', 'Supervisor', 'Complications'];
             
@@ -2361,6 +2496,7 @@
                     c.date,
                     c.time,
                     c.location || '',
+                    c.hospital || '',
                     c.patientAge,
                     c.patientSex,
                     c.asaGrade,
@@ -2490,17 +2626,101 @@
         }
 
         function updateLocationsList() {
+            // Update datalist for autocomplete
             const datalist = document.getElementById('locationsList');
             const locations = JSON.parse(localStorage.getItem('locations') || '[]');
             
             datalist.innerHTML = locations.map(loc => 
                 `<option value="${loc}">`
             ).join('');
+
+            // Update location manager if it exists (on export page)
+            const savedLocationsList = document.getElementById('savedLocationsList');
+            const noLocationsMsg = document.getElementById('noLocationsMsg');
+            
+            if (savedLocationsList) {
+                if (locations.length === 0) {
+                    savedLocationsList.innerHTML = '';
+                    noLocationsMsg.style.display = 'block';
+                } else {
+                    noLocationsMsg.style.display = 'none';
+                    savedLocationsList.innerHTML = locations.sort().map(loc => `
+                        <div class="location-tag">
+                            <span class="location-tag-text">📍 ${loc}</span>
+                            <button class="location-delete-btn" onclick="deleteLocation('${loc.replace(/'/g, "\\'")}');" title="Delete this location">
+                                ✕
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function deleteLocation(location) {
+            if (confirm(`Delete "${location}" from saved locations?\n\nThis won't affect any existing cases that use this location.`)) {
+                let locations = JSON.parse(localStorage.getItem('locations') || '[]');
+                locations = locations.filter(loc => loc !== location);
+                localStorage.setItem('locations', JSON.stringify(locations));
+                updateLocationsList();
+            }
+        }
+
+        // Hospital autocomplete management
+        function saveHospital(hospital) {
+            if (!hospital) return;
+            
+            let hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+            if (!hospitals.includes(hospital)) {
+                hospitals.push(hospital);
+                localStorage.setItem('hospitals', JSON.stringify(hospitals));
+                updateHospitalsList();
+            }
+        }
+
+        function updateHospitalsList() {
+            // Update datalist for autocomplete
+            const datalist = document.getElementById('hospitalsList');
+            const hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+            
+            datalist.innerHTML = hospitals.map(hosp => 
+                `<option value="${hosp}">`
+            ).join('');
+
+            // Update hospital manager if it exists (on export page)
+            const savedHospitalsList = document.getElementById('savedHospitalsList');
+            const noHospitalsMsg = document.getElementById('noHospitalsMsg');
+            
+            if (savedHospitalsList) {
+                if (hospitals.length === 0) {
+                    savedHospitalsList.innerHTML = '';
+                    noHospitalsMsg.style.display = 'block';
+                } else {
+                    noHospitalsMsg.style.display = 'none';
+                    savedHospitalsList.innerHTML = hospitals.sort().map(hosp => `
+                        <div class="hospital-tag">
+                            <span class="hospital-tag-text">🏥 ${hosp}</span>
+                            <button class="hospital-delete-btn" onclick="deleteHospital('${hosp.replace(/'/g, "\\'")}');" title="Delete this hospital">
+                                ✕
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        function deleteHospital(hospital) {
+            if (confirm(`Delete "${hospital}" from saved hospitals?\n\nThis won't affect any existing cases that use this hospital.`)) {
+                let hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+                hospitals = hospitals.filter(hosp => hosp !== hospital);
+                localStorage.setItem('hospitals', JSON.stringify(hospitals));
+                updateHospitalsList();
+            }
         }
 
         // Call on page load
         loadThemePreferences();
         updateLocationsList();
+        updateHospitalsList();
         updateCloudStorageUI();
 
         // Cloud Storage Integration
