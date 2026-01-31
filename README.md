@@ -2,7 +2,7 @@
 
 A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage their clinical cases in accordance with RCoA (Royal College of Anaesthetists) guidelines for GMC revalidation.
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Features
@@ -10,7 +10,8 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 ### 📋 Complete Case Logging
 - Full RCoA logbook fields including:
   - Patient demographics (age, sex, ASA grade)
-  - **Location tracking with autocomplete**
+  - **Location tracking** (where case was performed) with autocomplete
+  - **Hospital tracking** with autocomplete - enables grouping cases by institution
   - Procedure details and surgical specialties (including Trauma, Critical Care, Prehospital)
   - **Multiple anaesthetic techniques** (can select combinations of GA, RA, sedation, LA)
   - **28 regional techniques** (spinal, epidural, nerve blocks, plane blocks)
@@ -31,10 +32,23 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 - **Three color schemes**: Blue, Red, Green
 - Preferences saved across sessions
 - Professional medical interface design
+- Mobile-optimized with responsive layout
+
+### 🏥 Location & Hospital Management
+- **Free text entry** for locations and hospitals
+- **Autocomplete** - previously entered values remembered
+- **Management interface** in Export tab:
+  - View all saved locations and hospitals
+  - Delete entries with typos (✕ button on each)
+  - Alphabetically sorted lists
+  - Safe deletion - doesn't affect existing cases
+- **Grouping capability** - analyze cases by hospital/institution
+- **Multi-site support** - perfect for locums and rotations
 
 ### 📊 Statistics & Analytics
 - Total case count tracking
 - Breakdown by surgical specialty
+- Breakdown by hospital (when using exports)
 - ASA grade distribution
 - Complication tracking
 - Technique frequency analysis
@@ -42,14 +56,19 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 
 ### 💾 Data Export & Backup Options
 - **PDF Export**: Professional formatted document suitable for RCoA revalidation
-- **Excel Export**: Multi-sheet workbook with summary statistics and detailed case data
-- **CSV Export**: Simple spreadsheet format for further analysis
+- **Excel Export**: Multi-sheet workbook with:
+  - Summary statistics
+  - Complete case data with hospital column for grouping
+  - Regional technique breakdown
+  - Procedures breakdown
+- **CSV Export**: Simple spreadsheet format with all fields including hospital
 - **JSON Export**: Complete backup for data portability
 - **Cloud Storage Integration** (optional):
   - Google Drive sync
   - Dropbox sync
   - Box sync
   - Automatic backup on case save
+  - See CLOUD_STORAGE_GUIDE.md for setup
 
 ### 🔒 Privacy & Security
 - **100% Local Storage**: All data stays on your device by default
@@ -57,13 +76,15 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 - **Offline Capable**: Works without internet connection
 - **No Patient Identifiable Information**: Designed for anonymized data only
 - **GDPR Compliant**: Full data control and portability
+- **Saved lists management**: Remove typos without affecting case history
 
 ### 📱 Mobile Optimized
 - Responsive design for iPhone and iPad
 - Can be installed as a PWA (Add to Home Screen)
 - Works like a native app
 - Touch-optimized interface
-- Location autocomplete for quick data entry
+- Location and hospital autocomplete for quick data entry
+- Efficient data entry on small screens
 
 ## Installation
 
@@ -93,22 +114,52 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 1. Click on the "New Case" tab
 2. Fill in the required fields (marked with *):
    - Date, Location, Age, ASA Grade, Procedure
-3. Select anaesthetic technique(s) - **can select multiple** (e.g., GA + RA)
-4. For regional blocks, document:
+3. **Optional but recommended**: Enter Hospital name
+   - Enables grouping cases by institution
+   - Perfect for locums or rotation tracking
+   - Autocompletes after first use
+4. Select anaesthetic technique(s) - **can select multiple** (e.g., GA + RA)
+5. For regional blocks, document:
    - Which block(s) performed
    - Technique used (landmark, ultrasound, etc.)
    - Outcome (successful/partially/unsuccessful)
    - Whether catheter was inserted
-5. Select relevant procedures, monitoring, and complications
-6. Choose supervision level (Table 3: Levels 1, 2A, 2B, 3, 4)
-7. Add supervisor name and reflections
-8. Click "Save Case"
+6. Select relevant procedures, monitoring, and complications
+7. Choose supervision level (Table 3: Levels 1, 2A, 2B, 3, 4)
+8. Add supervisor name and reflections
+9. Click "Save Case"
+
+### Managing Saved Locations & Hospitals
+1. Go to "Export" tab
+2. Scroll to "Manage Saved Locations" section:
+   - View all previously entered locations
+   - Click ✕ to delete entries with typos
+   - Deletions don't affect existing cases
+3. Scroll to "Manage Saved Hospitals" section:
+   - View all previously entered hospitals
+   - Click ✕ to delete entries with typos
+   - Safe deletion - case data unchanged
+
+### Grouping Cases by Hospital
+**In Excel Export:**
+1. Export to Excel
+2. Open in Excel/Google Sheets
+3. Use "Sort & Filter" on Hospital column
+4. Create pivot tables by hospital
+5. Analyze experience across institutions
+
+**Common Use Cases:**
+- **Single hospital**: Enter once, reuse via autocomplete
+- **Locum work**: Track cases at multiple hospitals
+- **Rotation**: Monitor experience at each training site
+- **Audit**: Compare practice across institutions
 
 ### Customizing Your Experience
 1. **Change theme**: Click Dark/Light toggle in header
 2. **Change color scheme**: Click color circles (Blue/Red/Green)
 3. **Location autocomplete**: Previously entered locations are remembered
-4. Settings persist across sessions
+4. **Hospital autocomplete**: Previously entered hospitals are remembered
+5. Settings persist across sessions
 
 ### Viewing Cases
 1. Navigate to "My Cases" tab
@@ -199,6 +250,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 1. **Never store patient-identifiable information**
    - Do not use patient names, NHS numbers, or hospital numbers
    - Use anonymized data only
+   - Hospital field is for institution name only (e.g., "Royal Infirmary")
 
 2. **Regular Backups are ESSENTIAL**
    - **Recommended**: Export JSON weekly and upload to cloud storage
@@ -213,13 +265,20 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
    - Always maintain current cloud backups
    - Test: Save case → Close Safari → Reopen → Check case still there
 
-4. **Data Protection**
+4. **Location & Hospital Data**
+   - Saved locations and hospitals stored separately
+   - Can delete typos from autocomplete lists safely
+   - Deleting from lists doesn't affect case records
+   - Export includes all location and hospital data
+
+5. **Data Protection**
    - This app stores data locally on your device by default
    - Optional cloud sync puts data in YOUR cloud account (you control it)
    - No third-party access to your data
    - Export and delete data anytime
+   - Hospital field for institution tracking, not patient location
 
-5. **Production Use**
+6. **Production Use**
    - For professional use, consider:
      - Implementing secure backend storage
      - Adding encryption
@@ -234,6 +293,13 @@ See **CLOUD_STORAGE_GUIDE.md** for:
 - Advanced OAuth setup for automatic sync
 - Security considerations
 - Recommended approaches by user type
+
+### Hospital Grouping Benefits
+- **Multi-site tracking**: Perfect for locums and rotations
+- **Institutional analysis**: Compare your practice across hospitals
+- **Audit capability**: Group cases by institution in Excel
+- **Career portfolio**: Show breadth of experience
+- **No patient data**: Only records institution name
 
 ## Regional Techniques Supported
 
@@ -348,9 +414,14 @@ For each block, you can record:
 
 ## Roadmap
 
+### Completed in v2.1 ✅
+- [x] Hospital field with autocomplete
+- [x] Hospital management (add/delete from saved list)
+- [x] Hospital grouping in exports
+
 ### Completed in v2.0 ✅
 - [x] Light/Dark theme with color schemes
-- [x] Location autocomplete
+- [x] Location autocomplete with management
 - [x] Multiple anaesthetic techniques selection
 - [x] Regional block technique, outcome, and catheter tracking
 - [x] Table 3 supervision levels
@@ -362,6 +433,11 @@ For each block, you can record:
 - [ ] Cloud sync with working OAuth (Google Drive, Dropbox, Box)
 - [ ] Weekly backup reminder notifications
 - [ ] Advanced analytics and charts
+  - Cases by hospital over time
+  - Regional block success rates
+  - Complication trends
+- [ ] Filter cases by hospital in the app
+- [ ] Hospital-specific statistics view
 - [ ] Import from CSV/Excel
 - [ ] Customizable case templates
 - [ ] Photo attachments for learning documentation
@@ -373,6 +449,8 @@ For each block, you can record:
 - [ ] Offline sync queue (save cases offline, sync when online)
 - [ ] Multi-user support for departments
 - [ ] Case sharing for teaching/audit
+- [ ] Search by hospital/location
+- [ ] Bulk edit hospital names (for mergers/rebranding)
 
 ## Contributing
 
@@ -414,6 +492,25 @@ For issues, questions, or suggestions:
 - Contribute improvements via Pull Requests
 
 ## Version History
+
+### v2.1.0 (January 2026)
+- **Hospital Field**: Added dedicated hospital field for institution tracking
+  - Free text with autocomplete
+  - Enables grouping cases by hospital in Excel
+  - Perfect for locums and rotation tracking
+- **Enhanced Data Management**:
+  - "Manage Saved Hospitals" section in Export tab
+  - Delete hospital entries with typos (safe - doesn't affect cases)
+  - Improved location management interface
+  - Both lists alphabetically sorted
+- **Improved Case Display**:
+  - Hospital shown in case list (🏥 icon)
+  - Hospital displayed in case detail view
+  - All exports include hospital column
+- **Better Visual Organization**:
+  - Specialty icon changed to 🔬 (was 🏥)
+  - Hospital has dedicated 🏥 icon
+  - Clearer visual distinction between fields
 
 ### v2.0.0 (January 2026)
 - **Theme System**: Light/Dark mode with Blue/Red/Green color schemes
