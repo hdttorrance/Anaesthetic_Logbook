@@ -82,7 +82,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 - Responsive design for iPhone and iPad
 - Can be installed as a PWA (Add to Home Screen)
 - Works like a native app
-- Touch-optimized interface
+- Touch-optimised interface
 - Location and hospital autocomplete for quick data entry
 - Efficient data entry on small screens
 
