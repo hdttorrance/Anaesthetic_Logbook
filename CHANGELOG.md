@@ -5,6 +5,40 @@ All notable changes to the Anaesthetic Logbook project will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-01-31
+
+### Added
+- **Hospital Field**: New dedicated field for recording hospital/institution name
+  - Free text input with autocomplete functionality
+  - Automatically saves hospitals to remembered list
+  - Enables grouping and analyzing cases by institution
+- **Hospital Management Interface** in Export tab:
+  - "Manage Saved Hospitals" section
+  - View all previously entered hospitals
+  - Delete hospitals with typos using ✕ button
+  - Alphabetically sorted list
+  - Safe deletion (doesn't affect existing case records)
+- **Hospital Display** throughout app:
+  - Shows in case list with 🏥 icon
+  - Displayed in case detail modal
+  - Included in all export formats (PDF, Excel, CSV, JSON)
+- **Enhanced Export Functionality**:
+  - Hospital column in CSV export
+  - Hospital field in Excel export for filtering/grouping
+  - Hospital data in PDF case details
+
+### Changed
+- **Visual Icon Updates**:
+  - Specialty changed from 🏥 to 🔬 for clarity
+  - Hospital now uses 🏥 icon
+  - Better visual distinction between fields
+- **Location Label**: Clarified as "Location (where case was performed)"
+- **Export Tab Organization**: Separate sections for Location and Hospital management
+
+### Fixed
+- Icon overlap between specialty and hospital fields
+- Improved visual hierarchy in case displays
+
 ## [2.0.0] - 2026-01-30
 
 ### Added
