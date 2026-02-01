@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hospital column in CSV export
   - Hospital field in Excel export for filtering/grouping
   - Hospital data in PDF case details
+- **Working Cloud Backup Solutions**:
+  - **Email Backup button**: One-click send backup to yourself
+  - **Save to Files button**: Direct save to iCloud Drive/Google Drive/Dropbox
+  - Uses native OS cloud integration (no setup required)
+  - Web Share API support for mobile devices
+  - File System Access API for desktop
+  - Comprehensive CLOUD_STORAGE_GUIDE.md with platform-specific instructions
 
 ### Changed
 - **Visual Icon Updates**:
@@ -33,11 +40,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hospital now uses 🏥 icon
   - Better visual distinction between fields
 - **Location Label**: Clarified as "Location (where case was performed)"
-- **Export Tab Organization**: Separate sections for Location and Hospital management
+- **Export Tab Organization**: 
+  - Separate sections for Location and Hospital management
+  - New "Cloud Backup (Working Solutions)" section
+  - Removed non-functional OAuth placeholders
+- **Cloud Storage Approach**:
+  - Replaced OAuth integration UI with working solutions
+  - Simplified user experience
+  - No developer setup required
+
+### Removed
+- **OAuth Cloud Storage Buttons**: Removed Google Drive, Dropbox, Box OAuth buttons
+  - Required complex developer setup that 99% of users couldn't complete
+  - Replaced with working Email and File backup solutions
+- **Cloud Sync Configuration**: Removed non-functional sync status and settings
+- **Misleading Features**: Removed placeholder code that suggested features that didn't work
 
 ### Fixed
 - Icon overlap between specialty and hospital fields
 - Improved visual hierarchy in case displays
+- Cloud backup actually works now (not just placeholders)
 
 ## [2.0.0] - 2026-01-30
 
