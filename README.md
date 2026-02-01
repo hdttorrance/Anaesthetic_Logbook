@@ -27,12 +27,12 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
   - Supervisor details
   - Learning reflections for CPD
 
-### 🎨 Customizable Interface
+### 🎨 Customisable Interface
 - **Light/Dark mode** toggle
 - **Three color schemes**: Blue, Red, Green
 - Preferences saved across sessions
 - Professional medical interface design
-- Mobile-optimized with responsive layout
+- Mobile-optimised with responsive layout
 
 ### 🏥 Location & Hospital Management
 - **Free text entry** for locations and hospitals
@@ -42,7 +42,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
   - Delete entries with typos (✕ button on each)
   - Alphabetically sorted lists
   - Safe deletion - doesn't affect existing cases
-- **Grouping capability** - analyze cases by hospital/institution
+- **Grouping capability** - analyse cases by hospital/institution
 - **Multi-site support** - perfect for locums and rotations
 
 ### 📊 Statistics & Analytics
@@ -55,6 +55,11 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 - Regional block outcome tracking
 
 ### 💾 Data Export & Backup Options
+- **Cloud Backup (Easy & Automatic)**:
+  - **Email Backup**: One-click send to yourself for cloud storage
+  - **Save to Files**: Direct save to iCloud Drive/Google Drive/Dropbox
+  - Both methods work immediately - no setup required!
+  - See CLOUD_STORAGE_GUIDE.md for detailed instructions
 - **PDF Export**: Professional formatted document suitable for RCoA revalidation
 - **Excel Export**: Multi-sheet workbook with:
   - Summary statistics
@@ -62,23 +67,17 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
   - Regional technique breakdown
   - Procedures breakdown
 - **CSV Export**: Simple spreadsheet format with all fields including hospital
-- **JSON Export**: Complete backup for data portability
-- **Cloud Storage Integration** (optional):
-  - Google Drive sync
-  - Dropbox sync
-  - Box sync
-  - Automatic backup on case save
-  - See CLOUD_STORAGE_GUIDE.md for setup
+- **JSON Export**: Complete backup for data portability and restoration
 
 ### 🔒 Privacy & Security
 - **100% Local Storage**: All data stays on your device by default
 - **Optional Cloud Backup**: You control where data is synced
 - **Offline Capable**: Works without internet connection
-- **No Patient Identifiable Information**: Designed for anonymized data only
+- **No Patient Identifiable Information**: Designed for anonymised data only
 - **GDPR Compliant**: Full data control and portability
 - **Saved lists management**: Remove typos without affecting case history
 
-### 📱 Mobile Optimized
+### 📱 Mobile Optimised
 - Responsive design for iPhone and iPad
 - Can be installed as a PWA (Add to Home Screen)
 - Works like a native app
@@ -146,7 +145,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 2. Open in Excel/Google Sheets
 3. Use "Sort & Filter" on Hospital column
 4. Create pivot tables by hospital
-5. Analyze experience across institutions
+5. Analyse experience across institutions
 
 **Common Use Cases:**
 - **Single hospital**: Enter once, reuse via autocomplete
@@ -154,7 +153,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 - **Rotation**: Monitor experience at each training site
 - **Audit**: Compare practice across institutions
 
-### Customizing Your Experience
+### Customising Your Experience
 1. **Change theme**: Click Dark/Light toggle in header
 2. **Change color scheme**: Click color circles (Blue/Red/Green)
 3. **Location autocomplete**: Previously entered locations are remembered
@@ -170,16 +169,22 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
    - Complete procedure list
 4. Delete cases if needed
 
-### Cloud Backup (Optional)
+### Cloud Backup (Recommended)
 1. Go to "Export" tab
-2. **Manual Backup** (Recommended):
-   - Click "Export as JSON"
-   - Upload to your Google Drive/Dropbox/Box
+2. **Option A - Email Backup** (Simplest):
+   - Click "📧 Email Backup"
+   - Email opens with backup file
+   - Send to yourself
+   - Automatic cloud storage in Gmail/Outlook
    - Takes 30 seconds, do weekly
-3. **Automatic Sync** (Advanced):
-   - Requires OAuth setup (see CLOUD_STORAGE_GUIDE.md)
-   - One-time technical configuration
-   - Auto-syncs when you save cases
+3. **Option B - Save to Files** (Best for Mobile):
+   - Click "💾 Save to Files"
+   - Choose iCloud Drive (iOS) or Google Drive (Android)
+   - File syncs automatically
+   - Perfect for automatic backup
+4. **Set weekly reminder**: Sunday 8pm to backup!
+
+See **CLOUD_STORAGE_GUIDE.md** for detailed platform-specific instructions.
 
 ### Exporting Data
 1. Go to the "Export" tab
@@ -249,14 +254,15 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 
 1. **Never store patient-identifiable information**
    - Do not use patient names, NHS numbers, or hospital numbers
-   - Use anonymized data only
+   - Use anonymised data only
    - Hospital field is for institution name only (e.g., "Royal Infirmary")
 
 2. **Regular Backups are ESSENTIAL**
-   - **Recommended**: Export JSON weekly and upload to cloud storage
-   - **Minimum**: Export before any browser maintenance/updates
-   - **Best practice**: Multiple backup locations (cloud + local drive)
-   - Set phone/calendar reminders for weekly exports
+   - **Recommended**: Email Backup weekly (takes 30 seconds)
+   - **Or**: Save to Files → iCloud/Google Drive weekly (takes 10 seconds)
+   - **Best practice**: Use both methods for redundancy
+   - **Before revalidation**: Export all formats (PDF, Excel, JSON)
+   - Set phone/calendar reminders for weekly backups
    - See CLOUD_STORAGE_GUIDE.md for detailed backup strategies
 
 3. **Safari Users - Extra Caution**
@@ -288,11 +294,28 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
    - Or use with robust backup procedures
 
 ### Cloud Storage Options
+**Working solutions (no setup required):**
+
+**Email Backup** - Simplest method:
+- One-click send backup to yourself
+- Automatic cloud storage in Gmail/Outlook
+- Searchable email archive
+- Easy sharing with supervisors
+- Works on all devices
+
+**Save to Files** - Best for mobile:
+- Direct save to iCloud Drive (iOS)
+- Direct save to Google Drive (Android)  
+- Automatic cloud synchronisation
+- Native OS integration
+- Works offline, syncs when connected
+
 See **CLOUD_STORAGE_GUIDE.md** for:
-- Simple manual backup to Google Drive/Dropbox/Box
-- Advanced OAuth setup for automatic sync
-- Security considerations
-- Recommended approaches by user type
+- Step-by-step instructions for your device
+- Platform-specific tips (iOS/Android/Desktop)
+- Backup strategies and schedules
+- Security and privacy information
+- Troubleshooting help
 
 ### Hospital Grouping Benefits
 - **Multi-site tracking**: Perfect for locums and rotations
@@ -418,6 +441,8 @@ For each block, you can record:
 - [x] Hospital field with autocomplete
 - [x] Hospital management (add/delete from saved list)
 - [x] Hospital grouping in exports
+- [x] **Working cloud backup** (Email + Save to Files)
+- [x] Removed non-functional OAuth placeholders
 
 ### Completed in v2.0 ✅
 - [x] Light/Dark theme with color schemes
@@ -425,13 +450,12 @@ For each block, you can record:
 - [x] Multiple anaesthetic techniques selection
 - [x] Regional block technique, outcome, and catheter tracking
 - [x] Table 3 supervision levels
-- [x] Cloud storage UI (manual + OAuth framework)
 - [x] Enhanced complications tracking
 - [x] Additional procedures (thoracostomy, deep extubation)
 
 ### Future Enhancements
-- [ ] Cloud sync with working OAuth (Google Drive, Dropbox, Box)
-- [ ] Weekly backup reminder notifications
+- [ ] Weekly backup reminder notifications (in-app)
+- [ ] Google Sheets integration (direct sync to spreadsheet)
 - [ ] Advanced analytics and charts
   - Cases by hospital over time
   - Regional block success rates
@@ -439,13 +463,14 @@ For each block, you can record:
 - [ ] Filter cases by hospital in the app
 - [ ] Hospital-specific statistics view
 - [ ] Import from CSV/Excel
-- [ ] Customizable case templates
+- [ ] Customisable case templates
 - [ ] Photo attachments for learning documentation
 - [ ] Voice-to-text for reflections
 - [ ] Automated RCoA report generation
 - [ ] Colleague verification/sign-off workflow
 - [ ] Additional export formats (Word, PowerPoint)
-- [ ] Integration capabilities with hospital systems (with appropriate permissions)
+- [ ] Browser extension for Chrome/Edge sync
+- [ ] QR code export/import for offline transfer
 - [ ] Offline sync queue (save cases offline, sync when online)
 - [ ] Multi-user support for departments
 - [ ] Case sharing for teaching/audit
@@ -498,6 +523,11 @@ For issues, questions, or suggestions:
   - Free text with autocomplete
   - Enables grouping cases by hospital in Excel
   - Perfect for locums and rotation tracking
+- **Working Cloud Backup Solutions**:
+  - Email Backup button - send backup to yourself in 30 seconds
+  - Save to Files button - direct save to iCloud/Google Drive
+  - Replaced non-functional OAuth placeholders with working solutions
+  - No setup required - works immediately
 - **Enhanced Data Management**:
   - "Manage Saved Hospitals" section in Export tab
   - Delete hospital entries with typos (safe - doesn't affect cases)
@@ -507,7 +537,7 @@ For issues, questions, or suggestions:
   - Hospital shown in case list (🏥 icon)
   - Hospital displayed in case detail view
   - All exports include hospital column
-- **Better Visual Organization**:
+- **Better Visual Organisation**:
   - Specialty icon changed to 🔬 (was 🏥)
   - Hospital has dedicated 🏥 icon
   - Clearer visual distinction between fields
@@ -538,7 +568,7 @@ For issues, questions, or suggestions:
 - 38+ procedures
 - PDF, Excel, CSV, JSON export
 - Statistics dashboard
-- Mobile-optimized PWA
+- Mobile-optimised PWA
 - Offline capability
 
 ---
