@@ -2,7 +2,7 @@
 
 A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage their clinical cases in accordance with RCoA (Royal College of Anaesthetists) guidelines for GMC revalidation.
 
-![Version](https://img.shields.io/badge/version-2.1.0-blue)
+![Version](https://img.shields.io/badge/version-2.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Features
@@ -19,9 +19,12 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
     - Technique used (landmark, ultrasound in/out of plane, nerve stimulator)
     - Outcome (successful, partially successful, unsuccessful)
     - Catheter insertion (Y/N)
+  - **Airway management with intubation grading:**
+    - Direct Laryngoscopy Grade (Cormack-Lehane modified scale: 1, 2a, 2b, 3a, 3b, 4)
+    - Video Laryngoscopy (VCI Score): Blade type, POGO score, Tube delivery
+    - Based on validated VCI Score system (vciscore.com)
   - **40+ procedures and special techniques** (including thoracostomy, deep extubation)
   - Comprehensive monitoring options (Standard AAGBI)
-  - Airway management details
   - **Enhanced complications tracking** (including unexpected ICU admission and death)
   - **Table 3 supervision levels** (1, 2A, 2B, 3, 4 with detailed descriptions)
   - Supervisor details
@@ -123,10 +126,14 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
    - Technique used (landmark, ultrasound, etc.)
    - Outcome (successful/partially/unsuccessful)
    - Whether catheter was inserted
-6. Select relevant procedures, monitoring, and complications
-7. Choose supervision level (Table 3: Levels 1, 2A, 2B, 3, 4)
-8. Add supervisor name and reflections
-9. Click "Save Case"
+6. **For intubation cases**, document laryngoscopy views:
+   - **Direct laryngoscopy**: Select Cormack-Lehane grade (1-4, with subdivisions)
+   - **Video laryngoscopy**: Complete VCI Score (Blade type, POGO %, Tube delivery)
+   - Leave blank if not applicable
+7. Select relevant procedures, monitoring, and complications
+8. Choose supervision level (Table 3: Levels 1, 2A, 2B, 3, 4)
+9. Add supervisor name and reflections
+10. Click "Save Case"
 
 ### Managing Saved Locations & Hospitals
 1. Go to "Export" tab
@@ -324,6 +331,44 @@ See **CLOUD_STORAGE_GUIDE.md** for:
 - **Career portfolio**: Show breadth of experience
 - **No patient data**: Only records institution name
 
+## Airway Management Grading
+
+### Cormack-Lehane Grade (Direct Laryngoscopy)
+Modified scale with six grades:
+- **Grade 1**: Full view of glottis
+- **Grade 2a**: Partial view of glottis
+- **Grade 2b**: Only arytenoids visible
+- **Grade 3a**: Only epiglottis visible (can be lifted)
+- **Grade 3b**: Only epiglottis visible (cannot be lifted)
+- **Grade 4**: No glottic structures visible
+
+### VCI Score (Video Laryngoscopy)
+Three-component validated scoring system:
+
+**1. Blade Type** (categorised):
+- Macintosh-type: CMAC Macintosh, Glidescope Macintosh, McGrath Macintosh
+- Hyperangulated: CMAC D blade, Glidescope original, McGrath X blade
+- Channelled: Airtraq, Kingvision
+- Other: Miller blades, specialty blades
+
+**2. POGO Score**:
+- Percentage of Glottic Opening (0%, 25%, 50%, 75%, 100%)
+- Recorded at moment of intubation attempt
+
+**3. Tube Delivery**:
+- Straightforward, no adjuncts
+- As per manufacturer's recommendation
+- Needed bougie/Magill's/flexible scope
+- Failed delivery
+
+**Reference**: Based on VCI Score Project (vciscore.com) and British Journal of Anaesthesia publication (2025)
+
+**Use Cases**:
+- Difficult airway documentation
+- Video laryngoscopy training
+- Quality improvement and research
+- DOPS/ACAT evidence
+
 ## Regional Techniques Supported
 
 ### Neuraxial
@@ -437,6 +482,12 @@ For each block, you can record:
 
 ## Roadmap
 
+### Completed in v2.2 ✅
+- [x] Intubation grading system
+- [x] Cormack-Lehane modified scale
+- [x] VCI Score for videolaryngoscopy (official 3-component system)
+- [x] Comprehensive airway documentation
+
 ### Completed in v2.1 ✅
 - [x] Hospital field with autocomplete
 - [x] Hospital management (add/delete from saved list)
@@ -458,10 +509,18 @@ For each block, you can record:
 - [ ] Google Sheets integration (direct sync to spreadsheet)
 - [ ] Advanced analytics and charts
   - Cases by hospital over time
-  - Regional block success rates
+  - Regional block success rates by technique
   - Complication trends
+  - **Airway difficulty analysis** (C-L grade distribution, VCI score trends)
+  - **Failed intubation tracking**
 - [ ] Filter cases by hospital in the app
 - [ ] Hospital-specific statistics view
+- [ ] **Airway statistics dashboard**:
+  - C-L grade distribution
+  - VCI blade preferences
+  - POGO score averages
+  - Tube delivery difficulty rates
+- [ ] VCI score calculator within app
 - [ ] Import from CSV/Excel
 - [ ] Customisable case templates
 - [ ] Photo attachments for learning documentation
@@ -474,8 +533,9 @@ For each block, you can record:
 - [ ] Offline sync queue (save cases offline, sync when online)
 - [ ] Multi-user support for departments
 - [ ] Case sharing for teaching/audit
-- [ ] Search by hospital/location
+- [ ] Search by hospital/location/airway grade
 - [ ] Bulk edit hospital names (for mergers/rebranding)
+- [ ] Difficult airway alerts/flagging system
 
 ## Contributing
 
@@ -517,6 +577,21 @@ For issues, questions, or suggestions:
 - Contribute improvements via Pull Requests
 
 ## Version History
+
+### v2.2.0 (February 2026)
+- **Intubation Grading System**:
+  - Direct Laryngoscopy Grade using Cormack-Lehane modified scale (1, 2a, 2b, 3a, 3b, 4)
+  - Video Laryngoscopy using official VCI Score system (Blade, POGO, Tube Delivery)
+  - Based on validated VCI Score from vciscore.com (BJA 2025)
+  - Optional fields - complete only if intubation performed
+- **Enhanced Airway Documentation**:
+  - Three-component VCI scoring (blade type, POGO percentage, tube delivery)
+  - Categorised blade selection (Macintosh-type, Hyperangulated, Channelled)
+  - Support for research and audit data collection
+  - All airway grades included in exports
+- **Improved Data Exports**:
+  - Separate CSV columns for C-L grade and VCI components
+  - Comprehensive airway data in all export formats
 
 ### v2.1.0 (January 2026)
 - **Hospital Field**: Added dedicated hospital field for institution tracking
