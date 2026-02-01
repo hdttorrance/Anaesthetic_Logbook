@@ -1555,47 +1555,28 @@
                 </div>
 
                 <div class="card">
-                    <h2 class="card-header">Cloud Storage Sync</h2>
-                    <p style="margin-bottom: 1.5rem; opacity: 0.9;">Connect to cloud storage for automatic backups. Your data will be saved as JSON files that you can access from any device.</p>
+                    <h2 class="card-header">Cloud Backup (Working Solutions)</h2>
+                    <p style="margin-bottom: 1.5rem; opacity: 0.9;">Automatic cloud backup solutions that actually work - no complex setup required.</p>
                     
-                    <div id="cloudStatus" style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                            <span style="font-size: 1.2rem;">✓</span>
-                            <strong>Connected to <span id="connectedService"></span></strong>
-                        </div>
-                        <div style="font-size: 0.9rem; opacity: 0.8;">
-                            Last sync: <span id="lastSyncTime">Never</span>
-                        </div>
-                    </div>
-
                     <div class="btn-group">
-                        <button class="btn btn-primary" onclick="connectGoogleDrive()" id="googleDriveBtn">
-                            <span style="font-size: 1.2rem;">📁</span> Connect Google Drive
+                        <button class="btn btn-primary" onclick="emailBackup()">
+                            <span style="font-size: 1.2rem;">📧</span> Email Backup (Simplest)
                         </button>
-                        <button class="btn btn-primary" onclick="connectDropbox()" id="dropboxBtn">
-                            <span style="font-size: 1.2rem;">📦</span> Connect Dropbox
-                        </button>
-                        <button class="btn btn-primary" onclick="connectBox()" id="boxBtn">
-                            <span style="font-size: 1.2rem;">📤</span> Connect Box
-                        </button>
-                    </div>
-                    
-                    <div class="btn-group" style="margin-top: 1rem;">
-                        <button class="btn btn-secondary" onclick="syncToCloud()" id="syncBtn" disabled>
-                            🔄 Sync Now
-                        </button>
-                        <button class="btn btn-secondary" onclick="disconnectCloud()" id="disconnectBtn" disabled>
-                            🔌 Disconnect
+                        <button class="btn btn-primary" onclick="saveToFiles()">
+                            <span style="font-size: 1.2rem;">💾</span> Save to Files (iOS/Android)
                         </button>
                     </div>
 
                     <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(15, 163, 177, 0.1); border-left: 3px solid var(--teal); border-radius: 4px;">
                         <div style="font-size: 0.9rem; opacity: 0.9;">
-                            <strong>💡 How it works:</strong><br>
-                            • Your data is saved as a JSON file in your chosen cloud storage<br>
-                            • Automatic sync when you save a new case<br>
-                            • Access your backup from any device<br>
-                            • You maintain full control of your data
+                            <strong>💡 Email Backup:</strong> Opens your email with JSON attached. Send to yourself for automatic cloud backup in Gmail/Outlook.<br><br>
+                            <strong>💾 Save to Files:</strong> Save directly to iCloud Drive, Google Drive, or Dropbox on mobile devices.
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(212, 165, 116, 0.1); border-left: 3px solid var(--gold); border-radius: 4px;">
+                        <div style="font-size: 0.85rem; opacity: 0.9;">
+                            <strong>🔔 Backup Reminder:</strong> We recommend backing up weekly. Set a phone reminder for Sunday evenings!
                         </div>
                     </div>
                 </div>
@@ -2721,183 +2702,129 @@
         loadThemePreferences();
         updateLocationsList();
         updateHospitalsList();
-        updateCloudStorageUI();
 
-        // Cloud Storage Integration
-        let cloudConfig = {
-            service: null, // 'google', 'dropbox', or 'box'
-            accessToken: null,
-            fileName: 'anaesthetic-logbook-backup.json'
-        };
+        // Working Cloud Backup Solutions
 
-        function loadCloudConfig() {
-            const saved = localStorage.getItem('cloudConfig');
-            if (saved) {
-                cloudConfig = JSON.parse(saved);
-                updateCloudStorageUI();
-            }
-        }
-
-        function saveCloudConfig() {
-            localStorage.setItem('cloudConfig', JSON.stringify(cloudConfig));
-        }
-
-        function updateCloudStorageUI() {
-            loadCloudConfig();
-            
-            const isConnected = cloudConfig.service && cloudConfig.accessToken;
-            
-            // Update status display
-            const statusDiv = document.getElementById('cloudStatus');
-            const serviceSpan = document.getElementById('connectedService');
-            const syncBtn = document.getElementById('syncBtn');
-            const disconnectBtn = document.getElementById('disconnectBtn');
-            
-            if (isConnected) {
-                statusDiv.style.display = 'block';
-                serviceSpan.textContent = cloudConfig.service.charAt(0).toUpperCase() + cloudConfig.service.slice(1);
-                syncBtn.disabled = false;
-                disconnectBtn.disabled = false;
-                
-                // Update last sync time
-                const lastSync = localStorage.getItem('lastCloudSync');
-                if (lastSync) {
-                    const syncDate = new Date(lastSync);
-                    document.getElementById('lastSyncTime').textContent = syncDate.toLocaleString();
-                }
-                
-                // Disable connection buttons
-                document.getElementById('googleDriveBtn').disabled = true;
-                document.getElementById('dropboxBtn').disabled = true;
-                document.getElementById('boxBtn').disabled = true;
-            } else {
-                statusDiv.style.display = 'none';
-                syncBtn.disabled = true;
-                disconnectBtn.disabled = true;
-                
-                // Enable connection buttons
-                document.getElementById('googleDriveBtn').disabled = false;
-                document.getElementById('dropboxBtn').disabled = false;
-                document.getElementById('boxBtn').disabled = false;
-            }
-        }
-
-        async function connectGoogleDrive() {
-            // Google Drive OAuth 2.0 implementation
-            alert('Google Drive Integration:\n\n' +
-                  'To use Google Drive sync, you need to set up OAuth credentials:\n\n' +
-                  '1. Go to Google Cloud Console (console.cloud.google.com)\n' +
-                  '2. Create a new project\n' +
-                  '3. Enable Google Drive API\n' +
-                  '4. Create OAuth 2.0 credentials\n' +
-                  '5. Add your app URL to authorized origins\n\n' +
-                  'For a simpler solution, use the manual Export to JSON and upload to Google Drive manually.\n\n' +
-                  'Would you like a hosted version with cloud sync built-in? Please contact your administrator.');
-            
-            // For self-hosted version, users would need to add their own OAuth credentials
-            // This is a placeholder showing how it would work
-        }
-
-        async function connectDropbox() {
-            // Dropbox OAuth 2.0 implementation
-            alert('Dropbox Integration:\n\n' +
-                  'To use Dropbox sync, you need to:\n\n' +
-                  '1. Create a Dropbox app at dropbox.com/developers\n' +
-                  '2. Get your App key and secret\n' +
-                  '3. Configure OAuth redirect URL\n\n' +
-                  'For a simpler solution, use the manual Export to JSON and upload to Dropbox manually.\n\n' +
-                  'Would you like a hosted version with cloud sync built-in? Please contact your administrator.');
-        }
-
-        async function connectBox() {
-            // Box OAuth 2.0 implementation
-            alert('Box Integration:\n\n' +
-                  'To use Box sync, you need to:\n\n' +
-                  '1. Create a Box app at box.com/developers\n' +
-                  '2. Get your Client ID and secret\n' +
-                  '3. Configure OAuth redirect URL\n\n' +
-                  'For a simpler solution, use the manual Export to JSON and upload to Box manually.\n\n' +
-                  'Would you like a hosted version with cloud sync built-in? Please contact your administrator.');
-        }
-
-        async function syncToCloud() {
-            if (!cloudConfig.service || !cloudConfig.accessToken) {
-                alert('Please connect to a cloud storage service first.');
+        // Email Backup - sends JSON via email
+        function emailBackup() {
+            if (cases.length === 0) {
+                alert('No cases to backup. Add some cases first!');
                 return;
             }
 
-            try {
-                const dataStr = JSON.stringify(cases, null, 2);
-                
-                // Upload based on service
-                switch(cloudConfig.service) {
-                    case 'google':
-                        await uploadToGoogleDrive(dataStr);
-                        break;
-                    case 'dropbox':
-                        await uploadToDropbox(dataStr);
-                        break;
-                    case 'box':
-                        await uploadToBox(dataStr);
-                        break;
-                }
-                
-                localStorage.setItem('lastCloudSync', new Date().toISOString());
-                updateCloudStorageUI();
-                alert('✓ Synced successfully!');
-            } catch (error) {
-                console.error('Cloud sync error:', error);
-                alert('Sync failed. Please try again or check your connection.');
-            }
-        }
-
-        async function uploadToGoogleDrive(data) {
-            // Google Drive API upload implementation
-            // This would use the stored access token
-            throw new Error('OAuth setup required');
-        }
-
-        async function uploadToDropbox(data) {
-            // Dropbox API upload implementation
-            throw new Error('OAuth setup required');
-        }
-
-        async function uploadToBox(data) {
-            // Box API upload implementation
-            throw new Error('OAuth setup required');
-        }
-
-        function disconnectCloud() {
-            if (confirm('Disconnect from cloud storage? Your local data will not be affected, but automatic syncing will stop.')) {
-                cloudConfig = {
-                    service: null,
-                    accessToken: null,
-                    fileName: 'anaesthetic-logbook-backup.json'
-                };
-                saveCloudConfig();
-                localStorage.removeItem('lastCloudSync');
-                updateCloudStorageUI();
-                alert('Disconnected from cloud storage.');
-            }
-        }
-
-        // Auto-sync after saving a case (if connected)
-        const originalSaveCase = saveCase;
-        saveCase = function(e) {
-            originalSaveCase(e);
+            const dataStr = JSON.stringify(cases, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
             
-            // Auto-sync to cloud if connected
-            if (cloudConfig.service && cloudConfig.accessToken) {
-                setTimeout(() => {
-                    syncToCloud().catch(err => {
-                        console.error('Auto-sync failed:', err);
-                    });
-                }, 1000);
-            }
-        };
+            const latestCase = cases.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            const subject = `Anaesthetic Logbook Backup - ${new Date().toLocaleDateString('en-GB')}`;
+            const body = `Your anaesthetic logbook backup is attached.
 
-        // Initialize cloud storage UI
-        loadCloudConfig();
+Total Cases: ${cases.length}
+Latest Case: ${latestCase.date} - ${latestCase.procedure}
+Hospitals: ${[...new Set(cases.map(c => c.hospital).filter(Boolean))].join(', ') || 'None recorded'}
+
+Keep this email for your records.
+To restore: Import the attached JSON file in the app.
+
+Generated: ${new Date().toLocaleString('en-GB')}`;
+
+            // Try Web Share API first (works on mobile)
+            if (navigator.share && navigator.canShare) {
+                const file = new File([blob], `anaesthetic-logbook-${new Date().toISOString().split('T')[0]}.json`, {
+                    type: 'application/json'
+                });
+                
+                if (navigator.canShare({ files: [file] })) {
+                    navigator.share({
+                        title: subject,
+                        text: body,
+                        files: [file]
+                    }).then(() => {
+                        alert('✓ Backup shared! Send the email to yourself for cloud storage.');
+                    }).catch((error) => {
+                        console.log('Share cancelled or failed:', error);
+                        fallbackEmailDownload(dataStr, subject, body);
+                    });
+                    return;
+                }
+            }
+            
+            // Fallback: mailto + download
+            fallbackEmailDownload(dataStr, subject, body);
+        }
+
+        function fallbackEmailDownload(dataStr, subject, body) {
+            // Download the file
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `anaesthetic-logbook-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Open email client
+            const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailto;
+            
+            alert('✓ Backup downloaded! An email draft has been opened.\n\nAttach the downloaded file and send to yourself for cloud backup.');
+        }
+
+        // Save to Files - uses modern File System Access API or download
+        function saveToFiles() {
+            if (cases.length === 0) {
+                alert('No cases to save. Add some cases first!');
+                return;
+            }
+
+            const dataStr = JSON.stringify(cases, null, 2);
+            const filename = `anaesthetic-logbook-${new Date().toISOString().split('T')[0]}.json`;
+            
+            // Try File System Access API (Chrome/Edge on desktop)
+            if ('showSaveFilePicker' in window) {
+                saveWithFilePicker(dataStr, filename);
+            } else {
+                // Fallback: regular download (works on all browsers including iOS Safari)
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.click();
+                
+                setTimeout(() => {
+                    alert('✓ File saved to Downloads!\n\niOS/Android: Open Files app and move to iCloud Drive, Google Drive, or Dropbox for cloud backup.');
+                }, 500);
+            }
+        }
+
+        async function saveWithFilePicker(dataStr, filename) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{
+                        description: 'JSON Files',
+                        accept: { 'application/json': ['.json'] }
+                    }]
+                });
+                
+                const writable = await handle.createWritable();
+                await writable.write(dataStr);
+                await writable.close();
+                
+                alert('✓ File saved successfully!\n\nYour logbook has been saved. You can now upload it to any cloud service.');
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Save failed:', err);
+                    // Fallback to download
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    link.click();
+                }
+            }
+        }
     </script>
 </body>
 </html>
