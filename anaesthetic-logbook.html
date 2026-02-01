@@ -1167,6 +1167,81 @@
                             </select>
                         </div>
 
+                        <div class="form-group">
+                            <label for="directLaryngoscopyGrade">Direct Laryngoscopy Grade (Cormack-Lehane)</label>
+                            <select id="directLaryngoscopyGrade">
+                                <option value="">Not applicable / Not performed</option>
+                                <option value="Grade 1">Grade 1 - Full view of glottis</option>
+                                <option value="Grade 2a">Grade 2a - Partial view of glottis</option>
+                                <option value="Grade 2b">Grade 2b - Only arytenoids visible</option>
+                                <option value="Grade 3a">Grade 3a - Only epiglottis visible (can be lifted)</option>
+                                <option value="Grade 3b">Grade 3b - Only epiglottis visible (cannot be lifted)</option>
+                                <option value="Grade 4">Grade 4 - No glottic structures visible</option>
+                            </select>
+                        </div>
+
+                        <!-- VCI Score Components -->
+                        <div class="form-group full-width" style="margin-top: 1rem;">
+                            <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Video Laryngoscopy (VCI Score)</label>
+                            <p style="font-size: 0.85rem; opacity: 0.8; margin: 0 0 1rem 0;">Complete all three components if videolaryngoscopy was performed</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vciBlade">VCI - Blade Type</label>
+                            <select id="vciBlade">
+                                <option value="">Not applicable / Not performed</option>
+                                <optgroup label="Macintosh-type">
+                                    <option value="CMAC Macintosh blade">CMAC Macintosh blade</option>
+                                    <option value="Glidescope Macintosh blade">Glidescope Macintosh blade</option>
+                                    <option value="McGrath Macintosh blade">McGrath Macintosh blade</option>
+                                    <option value="Other Macintosh videolaryngoscope">Other Macintosh videolaryngoscope blade</option>
+                                </optgroup>
+                                <optgroup label="Hyperangulated">
+                                    <option value="CMAC D blade">CMAC D blade</option>
+                                    <option value="Glidescope original">Glidescope original</option>
+                                    <option value="McGrath X blade">McGrath X blade</option>
+                                    <option value="Other hyperangulated blade">Other hyperangulated videolaryngoscope blade</option>
+                                </optgroup>
+                                <optgroup label="Channelled">
+                                    <option value="Airtraq">Airtraq</option>
+                                    <option value="Kingvision">Kingvision</option>
+                                </optgroup>
+                                <optgroup label="Other">
+                                    <option value="CMAC C blade">CMAC C blade</option>
+                                    <option value="CMAC S blade">CMAC S blade</option>
+                                    <option value="Glidescope Miller blade">Glidescope Miller blade</option>
+                                    <option value="Other Miller videolaryngoscope">Other Miller videolaryngoscope blade</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vciPogo">VCI - POGO Score (%)</label>
+                            <select id="vciPogo">
+                                <option value="">Not applicable / Not performed</option>
+                                <option value="0">0% - No view of glottis</option>
+                                <option value="25">25%</option>
+                                <option value="50">50%</option>
+                                <option value="75">75%</option>
+                                <option value="100">100% - Full view of glottis</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="vciTubeDelivery">VCI - Tube Delivery</label>
+                            <select id="vciTubeDelivery">
+                                <option value="">Not applicable / Not performed</option>
+                                <option value="Straightforward">Straightforward, no adjuncts</option>
+                                <option value="As per manufacturer">As per manufacturer's recommendation</option>
+                                <option value="Bougie elective">Bougie used electively (M-type blade only)</option>
+                                <option value="Needed bougie">Needed bougie</option>
+                                <option value="Needed Magills">Needed Magill's forceps</option>
+                                <option value="Needed flexible scope">Needed flexible scope</option>
+                                <option value="Other difficulties">Other difficulties encountered</option>
+                                <option value="Failed">Tube delivery impossible / Failed</option>
+                            </select>
+                        </div>
+
                         <div class="form-group full-width">
                             <label for="induction">Induction Agents</label>
                             <textarea id="induction" placeholder="e.g. Propofol 200mg, Fentanyl 100mcg, Rocuronium 50mg"></textarea>
@@ -1710,6 +1785,10 @@
                 regionalOutcome: document.getElementById('regionalOutcome').value,
                 catheter: document.getElementById('catheter').value,
                 airway: document.getElementById('airway').value,
+                directLaryngoscopyGrade: document.getElementById('directLaryngoscopyGrade').value,
+                vciBlade: document.getElementById('vciBlade').value,
+                vciPogo: document.getElementById('vciPogo').value,
+                vciTubeDelivery: document.getElementById('vciTubeDelivery').value,
                 induction: document.getElementById('induction').value,
                 maintenance: document.getElementById('maintenance').value,
                 monitoring: getCheckedValues(['stdMonitoring', 'arterialLine', 'cvp', 'cvl', 'pacMonitoring', 'bis', 'tof', 'temp', 'nirs', 'cardiacOutput', 'toeEcho', 'ttEcho']),
@@ -1975,6 +2054,21 @@
                     <div class="detail-item">
                         <div class="detail-label">Airway</div>
                         <div class="detail-value">${caseData.airway}</div>
+                    </div>` : ''}
+                    ${caseData.directLaryngoscopyGrade ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Direct Laryngoscopy Grade</div>
+                        <div class="detail-value">${caseData.directLaryngoscopyGrade}</div>
+                    </div>` : ''}
+                    ${caseData.vciBlade || caseData.vciPogo || caseData.vciTubeDelivery || caseData.videoLaryngoscopyGrade ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Video Laryngoscopy (VCI Score)</div>
+                        <div class="detail-value">
+                            ${caseData.vciBlade ? `Blade: ${caseData.vciBlade}<br>` : ''}
+                            ${caseData.vciPogo ? `POGO: ${caseData.vciPogo}%<br>` : ''}
+                            ${caseData.vciTubeDelivery ? `Tube Delivery: ${caseData.vciTubeDelivery}` : ''}
+                            ${caseData.videoLaryngoscopyGrade ? `${caseData.videoLaryngoscopyGrade}` : ''}
+                        </div>
                     </div>` : ''}
                     ${caseData.induction ? `
                     <div class="detail-item">
@@ -2469,7 +2563,8 @@
 
             const headers = ['Date', 'Time', 'Location', 'Hospital', 'Age', 'Sex', 'ASA', 'Urgency', 'Procedure', 'Specialty', 
                            'Techniques', 'Regional Techniques', 'Regional Block Technique', 'Regional Outcome', 'Catheter',
-                           'Airway', 'Monitoring', 'Procedures', 'Supervision', 'Supervisor', 'Complications'];
+                           'Airway', 'Direct Laryngoscopy Grade', 'VCI Blade', 'VCI POGO', 'VCI Tube Delivery', 
+                           'Monitoring', 'Procedures', 'Supervision', 'Supervisor', 'Complications'];
             
             const rows = cases.map(c => {
                 const techniques = c.techniques || (c.primaryTechnique ? [c.primaryTechnique] : []);
@@ -2490,6 +2585,10 @@
                     c.regionalOutcome || '',
                     c.catheter || '',
                     c.airway,
+                    c.directLaryngoscopyGrade || '',
+                    c.vciBlade || c.videoLaryngoscopyGrade || '',
+                    c.vciPogo || '',
+                    c.vciTubeDelivery || '',
                     c.monitoring ? c.monitoring.join('; ') : '',
                     c.procedures ? c.procedures.join('; ') : '',
                     c.supervision,
