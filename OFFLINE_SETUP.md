@@ -3,6 +3,19 @@
 ## 🎯 Goal
 Make your app work 100% offline by downloading JavaScript libraries locally.
 
+## ✅ Good News: HTML Already Configured!
+
+The `anaesthetic-logbook.html` file **already uses local file paths**:
+```html
+<script src="jspdf.umd.min.js"></script>
+<script src="jspdf.plugin.autotable.min.js"></script>
+<script src="xlsx.full.min.js"></script>
+```
+
+**You just need to download the 3 files and put them in the same folder!**
+
+---
+
 ## 📥 Method 1: Download via Browser (Easiest)
 
 ### Step 1: Download the Files
@@ -26,29 +39,13 @@ Make your app work 100% offline by downloading JavaScript libraries locally.
 Create a folder with this structure:
 ```
 anaesthetic-logbook/
-  ├── index.html              (your main HTML file, renamed)
+  ├── anaesthetic-logbook.html  (or rename to index.html for hosting)
   ├── jspdf.umd.min.js
   ├── jspdf.plugin.autotable.min.js
   └── xlsx.full.min.js
 ```
 
-### Step 3: Update index.html
-
-**Find these lines near the bottom of index.html:**
-```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-```
-
-**Replace with:**
-```html
-<script src="jspdf.umd.min.js"></script>
-<script src="jspdf.plugin.autotable.min.js"></script>
-<script src="xlsx.full.min.js"></script>
-```
-
-**Save the file.**
+**That's it!** The HTML file already references these local files - no editing needed.
 
 ---
 
@@ -64,10 +61,10 @@ curl -o jspdf.umd.min.js https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspd
 curl -o jspdf.plugin.autotable.min.js https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js
 curl -o xlsx.full.min.js https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js
 
-# Copy your HTML file and rename
-cp /path/to/anaesthetic-logbook.html index.html
+# Copy your HTML file
+cp /path/to/anaesthetic-logbook.html .
 
-# Edit index.html and update the script tags (see Step 3 above)
+# Done! The HTML already uses local paths
 ```
 
 ---
