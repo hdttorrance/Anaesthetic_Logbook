@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a2540">
@@ -70,6 +70,10 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            /* iOS: Prevent swipe-back gesture and rubber-band scrolling */
+            overscroll-behavior-x: none;
+            overscroll-behavior-y: none;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Background texture */
@@ -105,6 +109,10 @@
             top: 0;
             z-index: 100;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            /* iOS: Respect the notch and safe areas */
+            padding-top: max(1.5rem, env(safe-area-inset-top));
+            padding-left: max(1.5rem, env(safe-area-inset-left));
+            padding-right: max(1.5rem, env(safe-area-inset-right));
         }
 
         .header-content {
@@ -334,7 +342,8 @@
             border-radius: 10px;
             color: var(--text-light);
             font-family: 'IBM Plex Sans', sans-serif;
-            font-size: 1rem;
+            /* iOS: 16px minimum to prevent auto-zoom on focus */
+            font-size: 16px;
             transition: all 0.3s ease;
         }
 
@@ -797,6 +806,97 @@
             transform: scale(1.1);
         }
 
+        /* iOS Data Loss Warning Banner */
+        .backup-warning {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 101;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+
+        .backup-warning.active {
+            display: flex;
+        }
+
+        .backup-warning-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .backup-warning-text {
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .backup-warning-btn {
+            background: white;
+            color: #dc2626;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        /* PII Disclaimer Modal */
+        .pii-disclaimer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .pii-disclaimer.active {
+            display: flex;
+        }
+
+        .pii-disclaimer-content {
+            background: linear-gradient(135deg, var(--deep-navy) 0%, var(--ocean-blue) 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 500px;
+            border: 2px solid var(--coral);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .pii-disclaimer h2 {
+            color: var(--coral);
+            margin-bottom: 1rem;
+        }
+
+        .pii-disclaimer-accept {
+            background: var(--teal);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
         /* Detail view in modal */
         .detail-section {
             margin-bottom: 2rem;
@@ -837,6 +937,40 @@
     </style>
 </head>
 <body>
+    <!-- iOS Data Loss Warning Banner -->
+    <div class="backup-warning" id="backupWarning">
+        <span class="backup-warning-icon">⚠️</span>
+        <span class="backup-warning-text">
+            <strong>CRITICAL:</strong> No backup in <span id="daysSinceBackup">7+</span> days. iOS may delete your data!
+        </span>
+        <button class="backup-warning-btn" onclick="switchView('export'); closeBackupWarning();">
+            Backup Now
+        </button>
+    </div>
+
+    <!-- PII Disclaimer (First Load Only) -->
+    <div class="pii-disclaimer" id="piiDisclaimer">
+        <div class="pii-disclaimer-content">
+            <h2>⚠️ Privacy & Data Protection</h2>
+            <p style="margin-bottom: 1rem; line-height: 1.6;">
+                <strong>IMPORTANT:</strong> This logbook is for anonymized case data only.
+            </p>
+            <ul style="margin-bottom: 1rem; padding-left: 1.5rem; line-height: 1.8;">
+                <li>Do NOT enter patient names, NHS numbers, or hospital numbers</li>
+                <li>Combination of date + age + hospital + procedure may identify patients</li>
+                <li>You are responsible for GDPR/Data Protection compliance</li>
+                <li>Data stored locally on your device (iOS may delete without warning)</li>
+                <li><strong>BACKUP WEEKLY</strong> - iOS can delete app data after 7 days of inactivity</li>
+            </ul>
+            <p style="margin-bottom: 1rem; opacity: 0.9; font-size: 0.9rem;">
+                By continuing, you acknowledge this is a personal logbook tool and you are responsible for appropriate use.
+            </p>
+            <button class="pii-disclaimer-accept" onclick="acceptDisclaimer()">
+                I Understand - Continue
+            </button>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
@@ -2801,6 +2935,124 @@
         loadThemePreferences();
         updateLocationsList();
         updateHospitalsList();
+
+        // iOS Critical Features: Backup Warning & PII Disclaimer
+        
+        // Check if first load and show PII disclaimer
+        function checkFirstLoad() {
+            const hasAcceptedDisclaimer = localStorage.getItem('piiDisclaimerAccepted');
+            if (!hasAcceptedDisclaimer) {
+                document.getElementById('piiDisclaimer').classList.add('active');
+            }
+        }
+
+        function acceptDisclaimer() {
+            localStorage.setItem('piiDisclaimerAccepted', 'true');
+            document.getElementById('piiDisclaimer').classList.remove('active');
+        }
+
+        // Check backup status and show warning if needed
+        function checkBackupStatus() {
+            const lastBackup = localStorage.getItem('lastBackupDate');
+            const now = new Date().getTime();
+            const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+            
+            if (!lastBackup) {
+                // No backup ever - show warning if they have cases
+                if (cases.length > 0) {
+                    showBackupWarning(999);
+                }
+                return;
+            }
+            
+            const lastBackupTime = new Date(lastBackup).getTime();
+            const daysSince = Math.floor((now - lastBackupTime) / (24 * 60 * 60 * 1000));
+            
+            if (daysSince >= 7) {
+                showBackupWarning(daysSince);
+            }
+        }
+
+        function showBackupWarning(days) {
+            const warningEl = document.getElementById('backupWarning');
+            const daysEl = document.getElementById('daysSinceBackup');
+            
+            if (days >= 999) {
+                daysEl.textContent = 'NEVER';
+            } else {
+                daysEl.textContent = days;
+            }
+            
+            warningEl.classList.add('active');
+            
+            // Also highlight the Export tab
+            const exportTab = document.querySelector('[onclick*="export"]');
+            if (exportTab) {
+                exportTab.style.background = 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)';
+                exportTab.style.animation = 'warningPulse 2s ease-in-out infinite';
+            }
+        }
+
+        function closeBackupWarning() {
+            document.getElementById('backupWarning').classList.remove('active');
+        }
+
+        // Update last backup timestamp on any export
+        function updateBackupTimestamp() {
+            localStorage.setItem('lastBackupDate', new Date().toISOString());
+            closeBackupWarning();
+            
+            // Remove Export tab highlight
+            const exportTab = document.querySelector('[onclick*="export"]');
+            if (exportTab) {
+                exportTab.style.background = '';
+                exportTab.style.animation = '';
+            }
+        }
+
+        // Wrap all export functions to update backup timestamp
+        const originalExportToJSON = exportToJSON;
+        exportToJSON = function() {
+            originalExportToJSON();
+            updateBackupTimestamp();
+        };
+
+        const originalExportToPDF = exportToPDF;
+        exportToPDF = function() {
+            originalExportToPDF();
+            updateBackupTimestamp();
+        };
+
+        const originalExportToExcel = exportToExcel;
+        exportToExcel = function() {
+            originalExportToExcel();
+            updateBackupTimestamp();
+        };
+
+        const originalExportToCSV = exportToCSV;
+        exportToCSV = function() {
+            originalExportToCSV();
+            updateBackupTimestamp();
+        };
+
+        const originalEmailBackup = emailBackup;
+        emailBackup = function() {
+            originalEmailBackup();
+            updateBackupTimestamp();
+        };
+
+        const originalSaveToFiles = saveToFiles;
+        saveToFiles = function() {
+            originalSaveToFiles();
+            updateBackupTimestamp();
+        };
+
+        // Check on page load
+        checkFirstLoad();
+        checkBackupStatus();
+        
+        // Check backup status every hour while app is open
+        setInterval(checkBackupStatus, 60 * 60 * 1000);
 
         // Working Cloud Backup Solutions
 
