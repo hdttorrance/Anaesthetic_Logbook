@@ -20,17 +20,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Separate CSV export columns for VCI Blade, POGO, and Tube Delivery
   - Support for both direct laryngoscopy and videolaryngoscopy grading
   - Optional fields - only complete if intubation performed
+- **iOS Critical Fixes**:
+  - Input zoom prevention: All form inputs now use 16px font (prevents iOS auto-zoom)
+  - iPhone notch support: Safe-area-insets for header and body
+  - Swipe-back prevention: overscroll-behavior prevents accidental navigation
+  - 7-day backup warning system: Red banner appears if no backup in 7+ days
+  - PII disclaimer modal: Privacy warning on first app load
+  - iOS-optimized viewport: viewport-fit=cover for full-screen experience
+- **Offline Capability**:
+  - Local JavaScript files (no CDN dependency)
+  - PDF and Excel exports work without internet
+  - Requires 3 JS files: jspdf.umd.min.js, jspdf.plugin.autotable.min.js, xlsx.full.min.js
+  - See OFFLINE_SETUP.md for download instructions
 
 ### Changed
 - **Airway Management Section**: Expanded with intubation grading fields
 - **Case Detail Modal**: Now displays Cormack-Lehane grade and VCI components separately
 - **Export Formats**: CSV includes new airway grading columns
+- **Script Tags**: Changed from CDN URLs to local file paths for offline reliability
+- **Viewport Meta**: Removed user-scalable=no for accessibility compliance
 
 ### Technical
 - VCI scoring matches official VCI Project implementation
 - Backward compatible with old cases
 - Three separate data fields for VCI components (blade, POGO, delivery)
 - Legacy `videoLaryngoscopyGrade` field preserved for old data
+- Input font-size: 16px minimum (iOS zoom prevention)
+- CSS safe-area-inset support for notch devices
+- Backup timestamp system tracks last export date
+- PII disclaimer stored in localStorage (shows once)
 
 ## [2.1.0] - 2026-01-31
 
