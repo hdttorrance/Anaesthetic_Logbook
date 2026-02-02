@@ -30,12 +30,12 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
   - Supervisor details
   - Learning reflections for CPD
 
-### 🎨 Customisable Interface
+### 🎨 Customizable Interface
 - **Light/Dark mode** toggle
 - **Three color schemes**: Blue, Red, Green
 - Preferences saved across sessions
 - Professional medical interface design
-- Mobile-optimised with responsive layout
+- Mobile-optimized with responsive layout
 
 ### 🏥 Location & Hospital Management
 - **Free text entry** for locations and hospitals
@@ -45,7 +45,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
   - Delete entries with typos (✕ button on each)
   - Alphabetically sorted lists
   - Safe deletion - doesn't affect existing cases
-- **Grouping capability** - analyse cases by hospital/institution
+- **Grouping capability** - analyze cases by hospital/institution
 - **Multi-site support** - perfect for locums and rotations
 
 ### 📊 Statistics & Analytics
@@ -63,32 +63,55 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
   - **Save to Files**: Direct save to iCloud Drive/Google Drive/Dropbox
   - Both methods work immediately - no setup required!
   - See CLOUD_STORAGE_GUIDE.md for detailed instructions
-- **PDF Export**: Professional formatted document suitable for RCoA revalidation
-- **Excel Export**: Multi-sheet workbook with:
-  - Summary statistics
-  - Complete case data with hospital column for grouping
-  - Regional technique breakdown
-  - Procedures breakdown
-- **CSV Export**: Simple spreadsheet format with all fields including hospital
+- **Offline-Ready Exports** (requires JavaScript files - see Installation):
+  - **PDF Export**: Professional formatted document suitable for RCoA revalidation
+  - **Excel Export**: Multi-sheet workbook with summary statistics and hospital grouping
+  - **CSV Export**: Simple spreadsheet format with all fields
 - **JSON Export**: Complete backup for data portability and restoration
+
+**⚠️ For offline PDF/Excel exports:** Download required JavaScript files (see OFFLINE_SETUP.md)
 
 ### 🔒 Privacy & Security
 - **100% Local Storage**: All data stays on your device by default
 - **Optional Cloud Backup**: You control where data is synced
 - **Offline Capable**: Works without internet connection
-- **No Patient Identifiable Information**: Designed for anonymised data only
+- **No Patient Identifiable Information**: Designed for anonymized data only
 - **GDPR Compliant**: Full data control and portability
 - **Saved lists management**: Remove typos without affecting case history
 
-### 📱 Mobile Optimised
+### 📱 Mobile Optimized
 - Responsive design for iPhone and iPad
 - Can be installed as a PWA (Add to Home Screen)
 - Works like a native app
-- Touch-optimised interface
+- Touch-optimized interface
 - Location and hospital autocomplete for quick data entry
 - Efficient data entry on small screens
 
 ## Installation
+
+### ⚠️ CRITICAL FIRST STEP: Download Required Files
+
+**This app requires 3 JavaScript files for PDF and Excel exports to work offline:**
+
+1. **jspdf.umd.min.js** (~200 KB)
+2. **jspdf.plugin.autotable.min.js** (~45 KB)  
+3. **xlsx.full.min.js** (~800 KB)
+
+**Quick Download:**
+See **OFFLINE_SETUP.md** for direct download links and complete instructions.
+
+**File Structure Required:**
+```
+your-folder/
+  ├── index.html (rename anaesthetic-logbook.html to this)
+  ├── jspdf.umd.min.js
+  ├── jspdf.plugin.autotable.min.js
+  └── xlsx.full.min.js
+```
+
+**⚠️ Without these files, exports will fail (especially in hospitals with poor WiFi)**
+
+---
 
 ### Option 1: Direct Use
 1. Download `anaesthetic-logbook.html`
@@ -104,11 +127,19 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 6. The app will now appear on your home screen like a native app
 
 ### Option 3: Host on GitHub Pages
-1. Fork this repository
-2. Go to Settings → Pages
-3. Select "Deploy from a branch"
-4. Choose "main" branch
+1. Create new GitHub repository named `anaesthetic-logbook`
+2. **Upload ALL 4 files** (must be in same directory):
+   - Rename `anaesthetic-logbook.html` to `index.html`
+   - Upload `index.html`
+   - Upload `jspdf.umd.min.js`
+   - Upload `jspdf.plugin.autotable.min.js`
+   - Upload `xlsx.full.min.js`
+3. Go to Settings → Pages
+4. Select "Deploy from a branch" → "main" branch → Save
 5. Your logbook will be available at `https://yourusername.github.io/anaesthetic-logbook/`
+6. Add to iPhone home screen (see Option 2)
+
+**⚠️ Critical:** All 4 files must be uploaded together for offline PDF/Excel exports to work!
 
 ## Usage
 
@@ -152,7 +183,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 2. Open in Excel/Google Sheets
 3. Use "Sort & Filter" on Hospital column
 4. Create pivot tables by hospital
-5. Analyse experience across institutions
+5. Analyze experience across institutions
 
 **Common Use Cases:**
 - **Single hospital**: Enter once, reuse via autocomplete
@@ -160,7 +191,7 @@ A comprehensive Progressive Web App (PWA) for anaesthetists to log and manage th
 - **Rotation**: Monitor experience at each training site
 - **Audit**: Compare practice across institutions
 
-### Customising Your Experience
+### Customizing Your Experience
 1. **Change theme**: Click Dark/Light toggle in header
 2. **Change color scheme**: Click color circles (Blue/Red/Green)
 3. **Location autocomplete**: Previously entered locations are remembered
@@ -261,7 +292,7 @@ See **CLOUD_STORAGE_GUIDE.md** for detailed platform-specific instructions.
 
 1. **Never store patient-identifiable information**
    - Do not use patient names, NHS numbers, or hospital numbers
-   - Use anonymised data only
+   - Use anonymized data only
    - Hospital field is for institution name only (e.g., "Royal Infirmary")
 
 2. **Regular Backups are ESSENTIAL**
@@ -313,7 +344,7 @@ See **CLOUD_STORAGE_GUIDE.md** for detailed platform-specific instructions.
 **Save to Files** - Best for mobile:
 - Direct save to iCloud Drive (iOS)
 - Direct save to Google Drive (Android)  
-- Automatic cloud synchronisation
+- Automatic cloud synchronization
 - Native OS integration
 - Works offline, syncs when connected
 
@@ -345,7 +376,7 @@ Modified scale with six grades:
 ### VCI Score (Video Laryngoscopy)
 Three-component validated scoring system:
 
-**1. Blade Type** (categorised):
+**1. Blade Type** (categorized):
 - Macintosh-type: CMAC Macintosh, Glidescope Macintosh, McGrath Macintosh
 - Hyperangulated: CMAC D blade, Glidescope original, McGrath X blade
 - Channelled: Airtraq, Kingvision
@@ -522,7 +553,7 @@ For each block, you can record:
   - Tube delivery difficulty rates
 - [ ] VCI score calculator within app
 - [ ] Import from CSV/Excel
-- [ ] Customisable case templates
+- [ ] Customizable case templates
 - [ ] Photo attachments for learning documentation
 - [ ] Voice-to-text for reflections
 - [ ] Automated RCoA report generation
@@ -586,12 +617,23 @@ For issues, questions, or suggestions:
   - Optional fields - complete only if intubation performed
 - **Enhanced Airway Documentation**:
   - Three-component VCI scoring (blade type, POGO percentage, tube delivery)
-  - Categorised blade selection (Macintosh-type, Hyperangulated, Channelled)
+  - Categorized blade selection (Macintosh-type, Hyperangulated, Channelled)
   - Support for research and audit data collection
   - All airway grades included in exports
 - **Improved Data Exports**:
   - Separate CSV columns for C-L grade and VCI components
   - Comprehensive airway data in all export formats
+- **iOS Critical Fixes**:
+  - Input zoom prevention (16px fonts)
+  - iPhone notch support (safe-area-insets)
+  - Swipe-back prevention (overscroll-behavior)
+  - 7-day backup warning system
+  - PII disclaimer on first load
+- **Offline Capability**:
+  - Changed to local JavaScript files (no CDN dependency)
+  - Works in hospitals with poor WiFi
+  - Requires downloading 3 JS files (see OFFLINE_SETUP.md)
+  - PDF and Excel exports work offline
 
 ### v2.1.0 (January 2026)
 - **Hospital Field**: Added dedicated hospital field for institution tracking
@@ -612,7 +654,7 @@ For issues, questions, or suggestions:
   - Hospital shown in case list (🏥 icon)
   - Hospital displayed in case detail view
   - All exports include hospital column
-- **Better Visual Organisation**:
+- **Better Visual Organization**:
   - Specialty icon changed to 🔬 (was 🏥)
   - Hospital has dedicated 🏥 icon
   - Clearer visual distinction between fields
@@ -643,7 +685,7 @@ For issues, questions, or suggestions:
 - 38+ procedures
 - PDF, Excel, CSV, JSON export
 - Statistics dashboard
-- Mobile-optimised PWA
+- Mobile-optimized PWA
 - Offline capability
 
 ---
